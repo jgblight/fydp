@@ -15,3 +15,6 @@ c:\users\sara\documents\visual studio 2012\Projects\KinectSetupDev\KinectSetupDe
 c:\users\sara\documents\visual studio 2012\Projects\KinectSetupDev\KinectSetupDev\obj\Debug\KinectSetupDev.csproj.GenerateResource.Cache
 c:\users\sara\documents\visual studio 2012\Projects\KinectSetupDev\KinectSetupDev\obj\Debug\KinectSetupDev.exe
 c:\users\sara\documents\visual studio 2012\Projects\KinectSetupDev\KinectSetupDev\obj\Debug\KinectSetupDev.pdb
+C:\Users\Jennifer\Documents\GitHub\fydp\KinectSetupDev\KinectSetupDev\bin\Debug\KinectSetupDev.exe.config
+C:\Users\Jennifer\Documents\GitHub\fydp\KinectSetupDev\KinectSetupDev\obj\Debug\KinectSetupDev.exe
+C:\Users\Jennifer\Documents\GitHub\fydp\KinectSetupDev\KinectSetupDev\obj\Debug\KinectSetupDev.pdb

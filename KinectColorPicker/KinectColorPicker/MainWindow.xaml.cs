@@ -42,7 +42,7 @@ namespace KinectColorPicker
         /// </summary>
         private byte[] colorPixels;
 
-        private YCbCrFiltering colorFilter;
+        private ColorFilter colorFilter;
 
         private bool processingFrame;
 
@@ -84,7 +84,7 @@ namespace KinectColorPicker
                 // Add an event handler to be called whenever there is new color frame data
                 this.sensor.ColorFrameReady += this.SensorColorFrameReady;
 
-                this.colorFilter = new YCbCrFiltering();
+                this.colorFilter = new ColorFilter();
 
                 // Start the sensor!
                 try
@@ -124,30 +124,14 @@ namespace KinectColorPicker
                         // Copy the pixel data from the image to a temporary array
                         colorFrame.CopyPixelDataTo(this.colorPixels);
 
-                        Bitmap bmp = new Bitmap(this.colorBitmap.PixelWidth, this.colorBitmap.PixelHeight, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-                        System.Drawing.Imaging.BitmapData bmData = bmp.LockBits(new System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height), System.Drawing.Imaging.ImageLockMode.ReadWrite, bmp.PixelFormat);
-                        IntPtr pNative = bmData.Scan0;
-                        System.Runtime.InteropServices.Marshal.Copy(this.colorPixels, 0, pNative, this.colorPixels.Length);
-                        bmp.UnlockBits(bmData);
-
-                        colorFilter.ApplyInPlace(bmp);
+                        IntPtr framePtr = this.colorFilter.FilterFrame(this.colorPixels, this.colorBitmap.PixelWidth, this.colorBitmap.PixelHeight);
 
                         this.colorBitmap.WritePixels(
                             new Int32Rect(0, 0, this.colorBitmap.PixelWidth, this.colorBitmap.PixelHeight),
-                            pNative,
+                            framePtr,
                             this.colorPixels.Length,
                             this.colorBitmap.PixelWidth * sizeof(int)
                             );
-
-
-
-                        // Write the pixel data into our bitmap
-                        /*this.colorBitmap.WritePixels(
-                            new Int32Rect(0, 0, this.colorBitmap.PixelWidth, this.colorBitmap.PixelHeight),
-                            this.colorPixels,
-                            this.colorBitmap.PixelWidth * sizeof(int),
-                            0);
-                        */
 
                     }
                 }
@@ -166,17 +150,8 @@ namespace KinectColorPicker
             byte g = this.colorPixels[pixelIndex + 1];
             byte r = this.colorPixels[pixelIndex + 2];
 
-            RGB rgbColor = new RGB(r, g, b);
-            HSL hslColor = HSL.FromRGB(rgbColor);
-            YCbCr yuvColor = YCbCr.FromRGB(rgbColor);
-
-            this.colorFilter.Cb = new AForge.Range(yuvColor.Cb - 0.02f, yuvColor.Cb + 0.02f);
-            this.colorFilter.Cr = new AForge.Range(yuvColor.Cr - 0.02f, yuvColor.Cr + 0.02f);
-            this.colorFilter.Y = new AForge.Range(yuvColor.Y - 0.1f, yuvColor.Y + 0.1f);
-
+            this.colorFilter.SetColor(r, g, b);
             
-
-            this.statusText.Text = "H: " + hslColor.Hue.ToString() + " S:" + hslColor.Saturation.ToString() + " L:" + hslColor.Luminance.ToString();
         }
     }
 }
