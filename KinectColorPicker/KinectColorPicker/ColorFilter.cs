@@ -13,33 +13,52 @@ namespace KinectColorPicker
 {
     class ColorFilter
     {
+        private bool applyFilters;
         private YCbCr color;
-        private YCbCrFiltering aForgeFilter;
+        private YCbCrFiltering colorFilter;
+        private GrayscaleBT709 grayFilter;
+        private Threshold binaryFilter;
+        private GrayscaleToRGB rgbFilter;
 
         public ColorFilter()
         {
-            this.aForgeFilter = new YCbCrFiltering();
+            this.applyFilters = false;
+            this.colorFilter = new YCbCrFiltering();
+            this.grayFilter = new GrayscaleBT709();
+            this.binaryFilter = new Threshold(1);
+            this.rgbFilter = new GrayscaleToRGB();
         }
 
         public void SetColor(byte r, byte g, byte b)
         {
             RGB rgbcolor = new RGB(r,g,b);
             this.color = YCbCr.FromRGB(rgbcolor);
-            this.aForgeFilter.Cb = new AForge.Range(this.color.Cb - 0.02f, this.color.Cb + 0.02f);
-            this.aForgeFilter.Cr = new AForge.Range(this.color.Cr - 0.02f, this.color.Cr + 0.02f);
-            this.aForgeFilter.Y = new AForge.Range(this.color.Y - 0.1f, this.color.Y + 0.1f);
-
+            this.colorFilter.Cb = new AForge.Range(this.color.Cb - 0.02f, this.color.Cb + 0.02f);
+            this.colorFilter.Cr = new AForge.Range(this.color.Cr - 0.02f, this.color.Cr + 0.02f);
+            this.colorFilter.Y = new AForge.Range(this.color.Y - 0.1f, this.color.Y + 0.1f);
+            this.applyFilters = true;
         }
 
         public IntPtr FilterFrame(byte[] pixels,int width,int height)
         {
+            
             Bitmap bmp = new Bitmap(width, height, PixelFormat.Format32bppArgb);
             BitmapData bmData = bmp.LockBits(new System.Drawing.Rectangle(0, 0, width, height), ImageLockMode.ReadWrite, bmp.PixelFormat);
             IntPtr pNative = bmData.Scan0;
             System.Runtime.InteropServices.Marshal.Copy(pixels, 0, pNative, pixels.Length);
             bmp.UnlockBits(bmData);
 
-            this.aForgeFilter.ApplyInPlace(bmp);
+            if (this.applyFilters)
+            {
+                this.colorFilter.ApplyInPlace(bmp);
+                Bitmap graybmp = this.grayFilter.Apply(bmp);
+                this.binaryFilter.ApplyInPlace(graybmp);
+                bmp = this.rgbFilter.Apply(graybmp).Clone(new Rectangle(0, 0, width, height), bmp.PixelFormat);
+
+                bmData = bmp.LockBits(new System.Drawing.Rectangle(0, 0, width, height), ImageLockMode.ReadWrite, bmp.PixelFormat);
+                pNative = bmData.Scan0;
+                bmp.UnlockBits(bmData);
+            }
 
             return pNative;
         }

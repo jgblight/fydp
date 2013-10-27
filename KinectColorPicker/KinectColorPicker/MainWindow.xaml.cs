@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
-using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -124,14 +123,13 @@ namespace KinectColorPicker
                         // Copy the pixel data from the image to a temporary array
                         colorFrame.CopyPixelDataTo(this.colorPixels);
 
-                        IntPtr framePtr = this.colorFilter.FilterFrame(this.colorPixels, this.colorBitmap.PixelWidth, this.colorBitmap.PixelHeight);
+                        IntPtr filteredPixels = this.colorFilter.FilterFrame(this.colorPixels, this.colorBitmap.PixelWidth, this.colorBitmap.PixelHeight);
 
                         this.colorBitmap.WritePixels(
                             new Int32Rect(0, 0, this.colorBitmap.PixelWidth, this.colorBitmap.PixelHeight),
-                            framePtr,
+                            filteredPixels,
                             this.colorPixels.Length,
-                            this.colorBitmap.PixelWidth * sizeof(int)
-                            );
+                            this.colorBitmap.PixelWidth * sizeof(int));
 
                     }
                 }
@@ -141,7 +139,7 @@ namespace KinectColorPicker
 
         private void ImageClick(object sender, MouseButtonEventArgs e)
         {
-            System.Windows.Point clickPoint = e.GetPosition(this.Image);
+            Point clickPoint = e.GetPosition(this.Image);
             int pixelX = (int) Math.Floor(clickPoint.X);
             int pixelY = (int) Math.Floor(clickPoint.Y);
 
