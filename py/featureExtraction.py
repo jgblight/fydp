@@ -37,11 +37,17 @@ while 1:
         filled = np.copy(imfilter)
         cv2.floodFill(filled,mask,(0,0),(255,255,255))
         imfilter = imfilter + 255 - filled
-        imfilter = cv2.medianBlur(imfilter,3)
+        imfilter = cv2.medianBlur(imfilter,5)
+
 
         contours, hierarchy = cv2.findContours(imfilter,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
 
-        cv2.drawContours(imfilter,contours,-1,(255,0,0),2)
+        mergeContour = contours[0]
+        for i in contours[1:]:
+            mergeContour = np.concatenate((mergeContour,i))
+
+        hull = cv2.convexHull(mergeContour)
+        cv2.drawContours(imfilter,[hull],-1,(255,0,0),2)
 
 
         #cvFilter = toCVMat(imfilter,1)
