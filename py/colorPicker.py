@@ -6,10 +6,14 @@ import cv2
 import frame_convert
 import time
 import math
+import csv
 
 imbgr = 0
 hsv = []
 yuv = []
+
+c = csv.writer(open("TestData.csv", "wb"), delimiter=',')
+c.writerow(['HSV', '', '', 'YCbCr'])
 
 def get_depth():
     return frame_convert.pretty_depth_cv(freenect.sync_get_depth()[0])
@@ -23,6 +27,7 @@ def onmouse(event, x, y, flags, param):
     if event == cv2.EVENT_LBUTTONDOWN:
         colorHSV = cv2.cvtColor(imbgr,cv.CV_BGR2HSV)[y,x,:]
         colorYCrCb = cv2.cvtColor(imbgr,cv.CV_BGR2YCrCb)[y,x,:]
+	c.writerow([colorHSV[0], colorHSV[1], colorHSV[2], colorYCrCb[0],colorYCrCb[1],colorYCrCb[2]])
         hsv.append(colorHSV)
         yuv.append(colorYCrCb)
         print str(colorHSV) + "     " + str(colorYCrCb)
@@ -85,6 +90,7 @@ def show(filename):
     n = 0.0
     hs1 = 0.0
     hs2 = 0.0
+
     ss1 = 0.0
     ss2 = 0.0
     vs1 = 0.0
