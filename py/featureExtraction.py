@@ -7,8 +7,6 @@ import cvblob
 import frame_convert
 import time
 
-imbgr = 0
-
 def get_depth():
     return frame_convert.pretty_depth_cv(freenect.sync_get_depth()[0])
 
@@ -24,42 +22,50 @@ def toCVMat(im,channels):
                im.dtype.itemsize * channels * im.shape[1])
     return image
 
+class colourFilter:
 
-while 1:
-    try:
-        #cv.ShowImage('Depth', get_depth())
-        imbgr = get_video()
-        cv2.imshow("Original",imbgr)
+    def __init__(self,low,high):
+        self.low = low
+        self.high = high
 
-        imhsv = cv2.cvtColor(imbgr,cv.CV_BGR2HSV)
-        imfilter = cv2.inRange(imhsv,cv.Scalar(35,80,80),cv.Scalar(50,255,255))
+    def getColourHull(self,imbgr):
+        imycrcb = cv2.cvtColor(imbgr,cv.CV_BGR2YCrCb)
+        imfilter = cv2.inRange(imycrcb,self.low,self.high)
         mask = np.zeros(np.add(imfilter.shape,[2,2]),dtype="uint8")
         filled = np.copy(imfilter)
-        cv2.floodFill(filled,mask,(0,0),(255,255,255))
-        imfilter = imfilter + 255 - filled
-        imfilter = cv2.medianBlur(imfilter,5)
 
+
+        imfilter = cv2.medianBlur(imfilter,7)
+        imfilter = cv2.medianBlur(imfilter,5)
+        imfilter = cv2.medianBlur(imfilter,3)
+        cv2.imshow("Blargh",imfilter)
 
         contours, hierarchy = cv2.findContours(imfilter,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
 
-        mergeContour = contours[0]
-        for i in contours[1:]:
-            mergeContour = np.concatenate((mergeContour,i))
+        if len(contours):
+            mergeContour = contours[0]
+            for i in contours[1:]:
+                mergeContour = np.concatenate((mergeContour,i))
 
-        hull = cv2.convexHull(mergeContour)
-        cv2.drawContours(imfilter,[hull],-1,(255,0,0),2)
+            return cv2.convexHull(mergeContour)
+        else:
+            return np.array([])
+
+def getHuMoments(hull):
+    if len(hull):
+        moments = cv2.moments(hull)
+        hu = cv2.HuMoments(moments)
+        feature = []
+        for i in hu:
+            feature.append(i[0])
+    else:
+        feature = np.zeros(7)
+    return feature
+
+def getZernickeMoments(hull):
+    pass
+
+def getFeatureVector(hull):
+    return getHuMoments(hull)
 
 
-        #cvFilter = toCVMat(imfilter,1)
-        #imlabel = cv.CreateImage((imfilter.shape[1],imfilter.shape[0]),cvblob.IPL_DEPTH_LABEL, 1)
-        #blobs = cvblob.Blobs()
-        #result = cvblob.Label(cvFilter,imlabel,blobs)
-        #print result
-        #print len(blobs.keys())
-
-        cv2.imshow('Filtered', imfilter)
-
-    except KeyboardInterrupt:
-        break
-    if cv.WaitKey(10) == 27:
-        break
