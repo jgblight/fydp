@@ -3,7 +3,7 @@ import freenect
 import numpy as np
 import cv
 import cv2
-import cvblob
+
 import frame_convert
 from scipy.misc import factorial as fac
 import cmath
