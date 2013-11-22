@@ -60,7 +60,7 @@ def getHuMoments(hull):
         for i in hu:
             feature.append(i[0])
     else:
-        feature = np.zeros(7)
+        feature = [0,0,0,0,0,0,0]
     return feature
 
 def ZernikeMom(n,l,image,xc,yc,N):

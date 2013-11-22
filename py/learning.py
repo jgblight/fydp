@@ -76,6 +76,7 @@ if __name__ == "__main__":
     # persist model
     pickler = open("model.pkl","wb")
     pickle.dump(gridclf,pickler)
+    pickle.dump(labels,pickler)
 
 
 
