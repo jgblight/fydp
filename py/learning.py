@@ -7,7 +7,7 @@ from sklearn import svm
 from sklearn import cross_validation, grid_search
 import pprint
 import csv
-import pickle
+import cPickle as pickle
 
 train_folder = "fakenect-storage/static_train"
 
@@ -93,7 +93,7 @@ if __name__ == "__main__":
 
     # persist model
     pickler = open("model.pkl","wb")
-    pickle.dump(gridclf,pickler)
+    pickle.dump(gridclf.best_estimator_,pickler)
     pickle.dump(labels,pickler)
 
 
