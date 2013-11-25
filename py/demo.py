@@ -26,7 +26,7 @@ if __name__ == "__main__":
 
     model = pickle.load(modelfile)
     labels = pickle.load(modelfile)
-    last10labels = deque([])
+    running = deque([])
 
     with open(sys.argv[1]) as csvfile:
         reader = csv.reader(csvfile)
@@ -37,26 +37,33 @@ if __name__ == "__main__":
 
     while 1:
         try:
-            #cv.ShowImage('Depth', get_depth())
             imbgr = fe.get_video()
-            cv2.imshow("Demo",imbgr)
             hull = green.getColourHull(imbgr)
             features = fe.getFeatureVector(hull)
 
             imbgrclass = model.predict([features])
             imbgrclass = imbgrclass[0]
             
-            if len(last10labels) < 10:
+            if len(running) < 10:
                 sign = imbgrclass
-                last10labels.append(sign)
+                running.append(sign)
             else:
-                sixth = last10labels.popleft()
-                last10labels.append(imbgrclass)
-                sign = median(last10labels)
+                _ = running.popleft()
+                running.append(imbgrclass)
+                sign = median(running)
 
             sign = int(round(sign))
 
             print labels[sign]
+
+            imgray = cv2.cvtColor(imbgr,cv.CV_BGR2GRAY)
+
+            cv2.drawContours(imgray,[hull],-1,(255,0,0),2)
+            cv2.putText(imgray,labels[sign],(5,50),cv2.FONT_HERSHEY_COMPLEX,2,(255,255,255),5)
+
+            cv2.imshow("Demo",imbgr)
+
+            cv2.imshow("Hull",imgray)
 
         except KeyboardInterrupt:
             break
