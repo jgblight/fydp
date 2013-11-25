@@ -71,7 +71,25 @@ if __name__ == "__main__":
     pp.pprint(gridclf.best_score_)
     print ""
 
-    print gridclf.score(testX,testY)
+    predictedY = gridclf.predict(testX)
+
+    confusion = np.zeros([len(labels),len(labels)])
+    for predicted,actual in zip(predictedY,testY):
+        confusion[predicted,actual] += 1
+
+    counts = []
+
+    for i in range(len(labels)):
+        actualcount = len(testY[testY == i])
+        confusion[:,i] = confusion[:,i] / actualcount 
+        counts.append(actualcount)
+
+    with open('model.csv','w') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(labels)
+        for row in confusion:
+            writer.writerow(row)
+        writer.writerow(counts)
 
     # persist model
     pickler = open("model.pkl","wb")
