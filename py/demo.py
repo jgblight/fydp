@@ -38,6 +38,7 @@ if __name__ == "__main__":
     while 1:
         try:
             imbgr = fe.get_video()
+            print imbgr.shape
             hull = green.getColourHull(imbgr)
             features = fe.getFeatureVector(hull)
 

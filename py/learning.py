@@ -2,6 +2,7 @@ import numpy as np
 import cv
 import cv2
 import os
+import sys
 import featureExtraction as fe
 from sklearn import svm
 from sklearn import cross_validation, grid_search
@@ -55,6 +56,9 @@ def getLabelledSets(folder):
 
 if __name__ == "__main__":
 
+    train_folder = sys.argv[1]
+    modelname = sys.argv[2]
+
     pp = pprint.PrettyPrinter(indent=4)
     X,Y,labels = getLabelledSets(train_folder)
     trainX, testX, trainY, testY = cross_validation.train_test_split(X,Y,test_size=0.4,random_state=0)
@@ -84,7 +88,7 @@ if __name__ == "__main__":
         confusion[:,i] = confusion[:,i] / actualcount 
         counts.append(actualcount)
 
-    with open('model.csv','w') as csvfile:
+    with open(modelname+'.csv','w') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(labels)
         for row in confusion:
@@ -92,7 +96,7 @@ if __name__ == "__main__":
         writer.writerow(counts)
 
     # persist model
-    pickler = open("model.pkl","wb")
+    pickler = open(modelname+".pkl","wb")
     pickle.dump(gridclf.best_estimator_,pickler)
     pickle.dump(labels,pickler)
 

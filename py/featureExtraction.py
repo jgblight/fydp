@@ -52,13 +52,13 @@ class colourFilter:
         else:
             return np.array([])
 
-def getHuMoments(hull):
+def getMoments(hull):
     if len(hull):
-        moments = cv2.moments(hull)
-        hu = cv2.HuMoments(moments)
-        feature = []
-        for i in hu:
-            feature.append(i[0])
+        m = cv2.moments(hull)
+        #hu = cv2.HuMoments(m)
+        feature = [m['nu20'],m['nu11'],m['nu02'],m['nu30'],m['nu21'],m['nu12'],m['nu03']]
+        #for i in hu:
+        #    feature.append(i[0])
     else:
         feature = [0,0,0,0,0,0,0]
     return feature
@@ -132,7 +132,7 @@ def getZernickeMoments(hull,maxorder):
 
 def getFeatureVector(hull):
     feature = []
-    feature += getHuMoments(hull)
+    feature += getMoments(hull)
     #feature += getZernickeMoments(hull,3)
     return feature
 
