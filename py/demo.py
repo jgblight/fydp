@@ -38,29 +38,32 @@ if __name__ == "__main__":
     while 1:
         try:
             imbgr = fe.get_video()
-            print imbgr.shape
             hull = green.getColourHull(imbgr)
-            features = fe.getFeatureVector(hull)
+            if len(hull):
+                features = fe.getFeatureVector(hull)
 
-            imbgrclass = model.predict([features])
-            imbgrclass = imbgrclass[0]
-            
-            if len(running) < 10:
-                sign = imbgrclass
-                running.append(sign)
+                imbgrclass = model.predict([features])
+                imbgrclass = imbgrclass[0]
+                
+                if len(running) < 10:
+                    sign = imbgrclass
+                    running.append(sign)
+                else:
+                    _ = running.popleft()
+                    running.append(imbgrclass)
+                    sign = median(running)
+
+                sign = int(round(sign))
+
+                letter = labels[sign]
             else:
-                _ = running.popleft()
-                running.append(imbgrclass)
-                sign = median(running)
+                letter = ""
 
-            sign = int(round(sign))
-
-            print labels[sign]
 
             imgray = cv2.cvtColor(imbgr,cv.CV_BGR2GRAY)
 
             cv2.drawContours(imgray,[hull],-1,(255,0,0),2)
-            cv2.putText(imgray,labels[sign],(5,50),cv2.FONT_HERSHEY_COMPLEX,2,(255,255,255),5)
+            cv2.putText(imgray,letter,(5,50),cv2.FONT_HERSHEY_COMPLEX,2,(255,255,255),5)
 
             cv2.imshow("Demo",imbgr)
 
