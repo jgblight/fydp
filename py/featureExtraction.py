@@ -52,13 +52,21 @@ class colourFilter:
         else:
             return np.array([])
 
-def getMoments(hull):
+def getCentralMoments(hull):
     if len(hull):
         m = cv2.moments(hull)
-        #hu = cv2.HuMoments(m)
         feature = [m['nu20'],m['nu11'],m['nu02'],m['nu30'],m['nu21'],m['nu12'],m['nu03']]
-        #for i in hu:
-        #    feature.append(i[0])
+    else:
+        feature = [0,0,0,0,0,0,0]
+    return feature
+
+def getHuMoments(hull):
+    if len(hull):
+        m = cv2.moments(hull)
+        hu = cv2.HuMoments(m)
+        feature = []
+        for i in hu:
+            feature.append(i[0])
     else:
         feature = [0,0,0,0,0,0,0]
     return feature
@@ -78,8 +86,6 @@ def ZernikeMom(n,l,image,xc,yc,N):
             c = -1
         den = (fac(m)*fac((n-2*m-l)/2.)*fac((n-2*m+l)/2.))
         coeff.append(c*fac(n-m)/den)
-
-    print coeff
 
     for x in range(xran):
         xn = (x-xc)/N
@@ -128,12 +134,14 @@ def getZernickeMoments(hull,maxorder):
                     moments.append(0)
     return moments
 
-
-
-def getFeatureVector(hull):
+def getFeatureVector(hull,featureSet):
     feature = []
-    feature += getMoments(hull)
-    #feature += getZernickeMoments(hull,3)
+    if 'central' in featureSet:
+        feature += getCentralMoments(hull)
+    if 'hu' in featureSet:
+        feature += getHuMoments(hull)
+    if 'zernike' in featureSet:
+        feature += getZernickeMoments(hull,3)
     return feature
 
 

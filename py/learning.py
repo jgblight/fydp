@@ -29,7 +29,7 @@ def getFeatures(folder):
         if os.path.splitext(f)[1] == ".ppm":
             imbgr = cv2.imread(os.path.join(folder,f))
             hull = green.getColourHull(imbgr)
-            features.append(fe.getFeatureVector(hull))
+            features.append(fe.getFeatureVector(hull,['central']))
     return features
    
 
@@ -82,18 +82,27 @@ if __name__ == "__main__":
         confusion[predicted,actual] += 1
 
     counts = []
+    precision = []
+    recall = []
+
+    pp.pprint(confusion)
 
     for i in range(len(labels)):
-        actualcount = len(testY[testY == i])
-        confusion[:,i] = confusion[:,i] / actualcount 
-        counts.append(actualcount)
+        precision.append(confusion[i,i] / float(sum(confusion[i,:])))
+        recall.append(confusion[i,i]/ float(sum(confusion[:,i])))
+        counts.append(sum(confusion[:,i]))
+
 
     with open(modelname+'.csv','w') as csvfile:
         writer = csv.writer(csvfile)
+        writer.writerow(['Cross-Validated Accuracy',gridclf.best_score_])
+        writer.writerow(['Precision']+ precision)
+        writer.writerow(['Recall']+recall)
+
+        writer.writerow(['Confusion Matrix'])
         writer.writerow(labels)
         for row in confusion:
             writer.writerow(row)
-        writer.writerow(counts)
 
     # persist model
     pickler = open(modelname+".pkl","wb")

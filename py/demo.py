@@ -40,7 +40,7 @@ if __name__ == "__main__":
             imbgr = fe.get_video()
             hull = green.getColourHull(imbgr)
             if len(hull):
-                features = fe.getFeatureVector(hull)
+                features = fe.getFeatureVector(hull,['central'])
 
                 imbgrclass = model.predict([features])
                 imbgrclass = imbgrclass[0]
