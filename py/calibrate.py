@@ -76,6 +76,21 @@ def callback(sampler):
 
     return onmouse
 
+def getColourRange(imbgr,writer,colour):
+    sampler = Sampler(imbgr)
+    windowname = "Select " + colour
+
+    cv2.namedWindow(windowname,1)
+    cv2.setMouseCallback(windowname, callback(sampler))
+
+    while 1: 
+        cv2.imshow(windowname,sampler.displayImage)
+        if cv.WaitKey(10) == 27:
+            break
+
+    writer.writerow(sampler.filter.low)
+    writer.writerow(sampler.filter.high)
+
 def calibrate(recordpath):
     for filename in os.listdir(recordpath):
         if os.path.splitext(filename)[1] == ".ppm":
@@ -83,21 +98,13 @@ def calibrate(recordpath):
             break
 
     imbgr = cv2.imread(ppmpath)
-    sampler = Sampler(imbgr)
 
-
-    cv2.namedWindow("Select",1)
-    cv2.setMouseCallback("Select", callback(sampler))
-
-    while 1: 
-        cv2.imshow("Select",sampler.displayImage)
-        if cv.WaitKey(10) == 27:
-            break
 
     with open(os.path.join(recordpath,'calibration.csv'),'w') as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(sampler.filter.low)
-        writer.writerow(sampler.filter.high)
+        getColourRange(imbgr,writer,"Green")
+        getColourRange(imbgr,writer,"Blue")
+
 
 
 if __name__ == "__main__":

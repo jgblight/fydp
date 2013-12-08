@@ -23,12 +23,17 @@ def getFeatures(folder):
         reader = csv.reader(csvfile)
         low = [ float(x) for x in reader.next()]
         high = [ float(x) for x in reader.next()]
+        green = fe.colourFilter(tuple(low),tuple(high))
+        low = [ float(x) for x in reader.next()]
+        high = [ float(x) for x in reader.next()]
+        blue = fe.colourFilter(tuple(low),tuple(high))
 
-    green = fe.colourFilter(tuple(low),tuple(high))
     for f in os.listdir(folder):
         if os.path.splitext(f)[1] == ".ppm":
             imbgr = cv2.imread(os.path.join(folder,f))
             hull = green.getColourHull(imbgr)
+            features.append(fe.getFeatureVector(hull,['central']))
+            hull = blue.getColourHull(imbgr)
             features.append(fe.getFeatureVector(hull,['central']))
     return features
    
@@ -84,8 +89,6 @@ if __name__ == "__main__":
     counts = []
     precision = []
     recall = []
-
-    pp.pprint(confusion)
 
     for i in range(len(labels)):
         precision.append(confusion[i,i] / float(sum(confusion[i,:])))
