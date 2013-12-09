@@ -323,7 +323,7 @@ When building a classifier, it is necessary to choose a C parameter, a kernel fu
 \hline
 \textbf{Parameter} & \textbf{Values} \\ \hline
 \( C \) &  1, 10, 100, 1000, 10000 \\ \hline
-kernal & \textit{linear}, \textit{rbf} \\ \hline
+kernel & \textit{linear}, \textit{rbf} \\ \hline
 \( \gamma \) & 0.01, 0.001, 0.0001, 0.00001 \\ 
 \hline
 \end{tabular}
@@ -613,14 +613,22 @@ The results of two trials for colour classification in each lighting scenario ar
 \tocsection{Appendix B - Classifier Training Results}
 
 \subsection*{Central Moments}
-\begin{center}
+\subsubsection*{Selected Parameters}
+	\hspace{1cm}
+	\begin{tabular}{r|c}
+	\(C\) & 10000 \\
+	kernel & linear \\
+	\end{tabular}
+
+\subsubsection*{Accuracy}
+	\hspace{1cm}
 	\begin{tabular}{l|c}
 	Cross-Validated Accuracy & 0.955\\
 	Test Accuracy & 0.957\\
 	\end{tabular}
 
-\vspace{1em}
-
+\subsubsection*{Confusion Matrix}
+\hspace{1cm}
     \begin{tabular}{c|ccccccccc}
 	& \multicolumn{9}{c}{Actual} \\ 
      Prediction         & A     & B     & C     & E     & F     & G     & H     & M     & N     \\ \hline
@@ -637,19 +645,27 @@ The results of two trials for colour classification in each lighting scenario ar
     Precision & 1.000 & 0.999 & 1.000 & 0.931 & 0.995 & 0.994 & 0.977 & 0.816 & 0.927 \\
     Recall    & 1.000 & 0.996 & 0.987 & 0.919 & 1.000 & 0.981 & 0.993 & 0.848 & 0.906 \\
     \end{tabular}
-\end{center}
 
 \newpage
 \subsection*{Hu Moments}
 
-\begin{center}
+
+\subsubsection*{Selected Parameters}
+	\hspace{1cm}
+	\begin{tabular}{r|c}
+	\(C\) & 10000 \\
+	kernel & linear \\
+	\end{tabular}
+
+\subsubsection*{Accuracy}
+	\hspace{1cm}
 	\begin{tabular}{l|c}
 	Cross-Validated Accuracy & 0.587 \\
 	Test Accuracy & 0.590 \\
 	\end{tabular}
 
-\vspace{1em}
-
+\subsubsection*{Confusion Matrix}
+\hspace{1cm}
     \begin{tabular}{c|ccccccccc}
 	& \multicolumn{9}{c}{Actual} \\ 
      Prediction         & A     & B     & C     & E     & F     & G     & H     & M     & N     \\ \hline
@@ -668,8 +684,5 @@ The results of two trials for colour classification in each lighting scenario ar
     \end{tabular}
 \vspace{1em}
 
-
-
-\end{center}
 
 \end{document}
