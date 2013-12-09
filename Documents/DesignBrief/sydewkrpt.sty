@@ -16,16 +16,16 @@
 \usepackage{booktabs}
 \usepackage{array}
 \usepackage{caption}
+\usepackage[compact]{titlesec}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%       Formatting     %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \setmainfont{Times New Roman}
 \doublespacing
-\addtolength{\parskip}{\baselineskip}
 \setlength{\parindent}{1em}
 \setlength{\cftsecnumwidth}{25pt}
-\setlength{\parskip}{1em}
+\setlength{\parskip}{0.25em}
 \widowpenalty10000
 \clubpenalty10000
 
@@ -34,6 +34,8 @@
 \setlength{\belowdisplayskip}{0pt}
 \setlength{\abovedisplayskip}{0pt}
 \allowdisplaybreaks
+
+\titlespacing{\section}{0pt}{0pt}{0pt}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% TEMPLATE DEFINITIONS %%%
@@ -103,6 +105,12 @@
       {\end{list}\bigskip
 
 }
+
+\newenvironment{enumerate*}%
+  {\setlength{\parskip}{-0.25em}
+   \begin{enumerate}%
+    \setlength{\itemsep}{0pt}}%
+  {\end{enumerate}}
 
 \newenvironment{waterlooletter}{
 \begin{singlespace}

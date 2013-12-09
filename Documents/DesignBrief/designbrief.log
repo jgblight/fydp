@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.1415926-2.5-0.9999.3 (TeX Live 2013) (format=xelatex 2013.5.30)  8 DEC 2013 22:46
+This is XeTeX, Version 3.1415926-2.5-0.9999.3 (TeX Live 2013) (format=xelatex 2013.5.30)  8 DEC 2013 23:39
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -671,6 +671,18 @@ Package caption3 Info: TeX engine: e-TeX on input line 57.
 \c@ContinuedFloat=\count161
 Package caption Info: listings package is loaded.
 )
+(/usr/local/texlive/2013/texmf-dist/tex/latex/titlesec/titlesec.sty
+Package: titlesec 2011/12/15 v2.10.0 Sectioning titles
+\ttl@box=\box71
+\beforetitleunit=\skip87
+\aftertitleunit=\skip88
+\ttl@plus=\dimen191
+\ttl@minus=\dimen192
+\ttl@toksa=\toks26
+\titlewidth=\dimen193
+\titlewidthlast=\dimen194
+\titlewidthfirst=\dimen195
+)
 \g__file_internal_ior=\read1
 \g_fontspec_family_Times New Roman_int=\count162
 .................................................
@@ -694,7 +706,7 @@ Package caption Info: listings package is loaded.
 . <->"Times New Roman/BI/ICU:script=latn;language=DFLT;"
 .................................................
 )
-(./designbrief.aux)
+No file designbrief.aux.
 \openout1 = `designbrief.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 4.
@@ -713,7 +725,7 @@ LaTeX Font Info:    Checking defaults for EU1/lmr/m/n on input line 4.
 LaTeX Font Info:    ... okay on input line 4.
 LaTeX Font Info:    Checking defaults for T3/cmr/m/n on input line 4.
 LaTeX Font Info:    Try loading font information for T3+cmr on input line 4.
- (/usr/local/texlive/2013/texmf-dist/tex/latex/tipa/t3cmr.fd
+(/usr/local/texlive/2013/texmf-dist/tex/latex/tipa/t3cmr.fd
 File: t3cmr.fd 2001/12/31 TIPA font definitions
 )
 LaTeX Font Info:    ... okay on input line 4.
@@ -836,125 +848,63 @@ LaTeX Font Warning: Font shape `EU1/TimesNewRoman(0)/bx/sc' undefined
 
 [1
 
-] [1] (./designbrief.toc
-LaTeX Font Info:    Try loading font information for U+msa on input line 1.
+] [1]
+No file designbrief.toc.
+\tf@toc=\write3
+\openout3 = `designbrief.toc'.
+
+[2]
+No file designbrief.lot.
+\tf@lot=\write4
+\openout4 = `designbrief.lot'.
+
+No file designbrief.lof.
+\tf@lof=\write5
+\openout5 = `designbrief.lof'.
+
+[3] [1]
+
+LaTeX Warning: Reference `fig:MORE' on page 2 undefined on input line 52.
+
+[2]
+File: MORESWEETHEART.png Graphic file (type QTm)
+ <use  "MORESWEETHEART.png" > [3] [4]
+LaTeX Font Info:    Try loading font information for U+msa on input line 86.
 
 (/usr/local/texlive/2013/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 1.
+LaTeX Font Info:    Try loading font information for U+msb on input line 86.
 
 (/usr/local/texlive/2013/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-) [2])
-\tf@toc=\write3
-\openout3 = `designbrief.toc'.
+)
 
- [3]
-(./designbrief.lot)
-\tf@lot=\write4
-\openout4 = `designbrief.lot'.
+LaTeX Warning: Reference `table:Requirements' on page 5 undefined on input line
+ 94.
 
- (./designbrief.lof)
-\tf@lof=\write5
-\openout5 = `designbrief.lof'.
 
- [4] [1] [2]
-File: MORESWEETHEART.png Graphic file (type QTm)
+LaTeX Warning: Citation `ASLU' on page 5 undefined on input line 104.
 
-<use  "MORESWEETHEART.png" >
 
-LaTeX Warning: `!h' float specifier changed to `!ht'.
-
-[3] [4] [5]
-
-LaTeX Warning: `!h' float specifier changed to `!ht'.
+LaTeX Warning: Citation `Expression' on page 5 undefined on input line 104.
 
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-[6] [7]
+
+LaTeX Warning: Reference `table:Constraints' on page 5 undefined on input line 
+114.
+
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+[5]
+
+LaTeX Warning: Reference `fig:Process' on page 6 undefined on input line 132.
+
+[6]
 File: Process.png Graphic file (type QTm)
- <use  "Process.png" > [8]
-Underfull \hbox (badness 1917) in paragraph at lines 174--174
-[]|\EU1/TimesNewRoman(0)/m/n/12 3D Hand Tracking by The
- []
+ <use  "Process.png" > [7]
 
-
-Overfull \hbox (10.68904pt too wide) in paragraph at lines 171--182
- [][] 
- []
-
-[9]
-File: FORTH.png Graphic file (type QTm)
- <use  "FORTH.png" > [10]
-File: GloveDesign.png Graphic file (type QTm)
- <use  "GloveDesign.png" > [11]
-File: YUV.png Graphic file (type QTm)
- <use  "YUV.png" >
-File: LightTest.png Graphic file (type QTm)
-
-<use  "LightTest.png" >
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-
-LaTeX Warning: Reference `light' on page 12 undefined on input line 228.
-
-File: YUVTest.png Graphic file (type QTm)
-<use  "YUVTest.png" >
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-[12]
-File: BinaryTest.png Graphic file (type QTm)
- <use  "BinaryTest.png" >
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-[13] [14] [15] [16]
-File: classifier.eps Graphic file (type eps)
- <classifier.eps>
-
-LaTeX Warning: `!h' float specifier changed to `!ht'.
-
-File: rbf.eps Graphic file (type eps)
-<rbf.eps>
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-[17] [18] [19]
-File: Hull.png Graphic file (type QTm)
- <use  "Hull.png" > [20] [21]
-File: Mother.png Graphic file (type QTm)
- <use  "Mother.png" >
-File: Mother2.png Graphic file (type QTm)
-
-<use  "Mother2.png" >
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-[22]
-File: Gantt.png Graphic file (type QTm)
- <use  "Gantt.png" >
-
-LaTeX Warning: `!h' float specifier changed to `!ht'.
-
-[23] [24] [25] [26] [27] [28] [29] [30] [31] (./designbrief.aux)
-
-LaTeX Font Warning: Some font shapes were not available, defaults substituted.
-
-
-LaTeX Warning: There were undefined references.
-
- ) 
-Here is how much of TeX's memory you used:
- 17986 strings out of 493938
- 370635 string characters out of 6148857
- 386664 words of memory out of 5000000
- 21053 multiletter control sequences out of 15000+600000
- 11230 words of font info for 63 fonts, out of 8000000 for 9000
- 1144 hyphenation exceptions out of 8191
- 44i,11n,40p,1071b,297s stack positions out of 5000i,500n,10000p,200000b,80000s
-
-Output written on designbrief.pdf (36 pages).
+LaTeX Warning: Reference `table:libraries' on page 8 undefined on input line 1
