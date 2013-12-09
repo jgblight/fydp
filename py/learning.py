@@ -29,7 +29,7 @@ def getFeatures(folder):
         if os.path.splitext(f)[1] == ".ppm":
             imbgr = cv2.imread(os.path.join(folder,f))
             hull = green.getColourHull(imbgr)
-            features.append(fe.getFeatureVector(hull,['central']))
+            features.append(fe.getFeatureVector(hull,['zernike']))
     return features
    
 
