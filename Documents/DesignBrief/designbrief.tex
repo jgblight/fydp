@@ -7,7 +7,7 @@
 
   }{
   Jennifer Blight  20347163\\
-  Sara Greenberg \\
+  Sara Greenberg 20356941\\
   4A Systems Design Engineering\\
   December 2013
   }
@@ -39,17 +39,15 @@ American Sign Language (ASL) has a unique syntax and grammar, and presents a sig
 While a great deal of research has been done in the area, the current state-of-the-art for video recognition is nowhere near the accuracy or completeness required for adoption by fluent ASL users. Instead, we propose the use of video recognition techniques for the development of a teaching tool intended to train new ASL learners in vocabulary and grammar. Such a problem represents one possible specific application of ASL-to-English video translation which we believe is well-scoped for the time given because we can more easily put constraints on the video content and environment. We will investigate various gesture recognition techniques, alone and in concert, for the purpose of identifying correctly signed gestures and sequences performed by the user. Potential users of the system include Hearing learners and users of other sign languages who want to learn ASL.
 
 \subsection{State of the Art}
-\dothis{Fix Citations!}
-
 The problem of sign language recognition and translation has received a lot of attention from researchers in the past few decades as a potential application of gesture recognition algorithms. As a result, there is a great deal of literature describing potential methods for recognizing signs and signed phrases. Most of these methods represent only partial solution--for example, they may recognize gross arm movements or static hand postures but not both--and as of this writing none have been successfully implemented commercially. A sample of these will be described here.
 
-The most popular input devices for gesture recognition are cameras and data-gloves. Vision-based solutions are more common; however, some glove-based solutions have been developed. The AcceleGlove, [3] a whole-hand device employing six accelerometers mounted on the fingers and the back of the hand, has been used to identify the ASL alphabet signs for a ‘virtual keyboard’ application. The AcceleGlove was made available at \$649, considered cost-effective compared to similar devices which can cost \$1000-\$2000. [4] In addition to being more expensive than vision-based systems, the glove is mainly used to detect hand posture, rather than arm movements, and must be plugged in to a computer.
+The most popular input devices for gesture recognition are cameras and data-gloves. Vision-based solutions are more common; however, some glove-based solutions have been developed. The AcceleGlove, \cite{Accele} a whole-hand device employing six accelerometers mounted on the fingers and the back of the hand, has been used to identify the ASL alphabet signs for a ‘virtual keyboard’ application. The AcceleGlove was made available at \$649, considered cost-effective compared to similar devices which can cost \$1000-\$2000. \cite{Accele2} In addition to being more expensive than vision-based systems, the glove is mainly used to detect hand posture, rather than arm movements, and must be plugged in to a computer.
 
 Examples of vision-based systems include a recent project from the University of Waterloo. The goal was to create a desktop video communication application that would allow ASL users to communicate with non-ASL users with a sign-to-text feature. This feature was implemented using a Bayesian classifier to identify skin pixels and an AdaBoosted Haar classifier to identify hand postures. This method is limited to static signs, such as the ASL alphabet, and exhibits limited accuracy.
 
-Another interesting research project is the ASL teaching game for children, CopyCat, from the Georgia Institute of Technology. [5] Users wear coloured gloves with wrist-mounted accelerometers and sign in front of a camera in order to direct the characters of a puzzle-solving game. The game uses Hidden Markov Models to verify short, structured ASL sentences of three to five signs based on the accelerometer data as well as the red and blue histograms from the camera (to detect the red and purple gloves). This demonstrates the feasibility of using computer vision techniques to help learners practice sign language. However, the current setup of the system would make it difficult to adopt in the home; lighting and positioning of the user must be carefully controlled and the user is required to wear wrist-mounted accelerometers. 
+Another interesting research project is the ASL teaching game for children, CopyCat, from the Georgia Institute of Technology. \cite{Zafrulla} Users wear coloured gloves with wrist-mounted accelerometers and sign in front of a camera in order to direct the characters of a puzzle-solving game. The game uses Hidden Markov Models to verify short, structured ASL sentences of three to five signs based on the accelerometer data as well as the red and blue histograms from the camera (to detect the red and purple gloves). This demonstrates the feasibility of using computer vision techniques to help learners practice sign language. However, the current setup of the system would make it difficult to adopt in the home; lighting and positioning of the user must be carefully controlled and the user is required to wear wrist-mounted accelerometers. 
 
-Furthermore, a recent project developed by Microsoft Research Asia and the Institute of Computing Technology at the Chinese Academy is capable of translating certain sentences of Chinese Sign Language and American Sign Language using the Microsoft Kinect. [6] This application creates a 3D trajectory of the user’s hand motions and compares it to a gallery of prototype signs, selecting the most likely candidate based on Euclidean distance. The system has demonstrated recognition rates of 83\%. This project also contains a “Communication” mode, where an avatar can perform sign language motions based on a textual input. The goal of this project is to assist ASL users in their interactions with computers and gaming systems. The drawback of this system is the lack of individual finger tracking. The hands are tracked as points, and so much information is lost. Some signs have similar hand motions but different hand poses and finger motions; for example, the signs “MORE” and “SWEETHEART” are similar, as shown in Figure \ref{fig:MORE}. 
+Furthermore, a recent project developed by Microsoft Research Asia and the Institute of Computing Technology at the Chinese Academy is capable of translating certain sentences of Chinese Sign Language and American Sign Language using the Microsoft Kinect. \cite{Chai} This application creates a 3D trajectory of the user’s hand motions and compares it to a gallery of prototype signs, selecting the most likely candidate based on Euclidean distance. The system has demonstrated recognition rates of 83\%. This project also contains a “Communication” mode, where an avatar can perform sign language motions based on a textual input. The goal of this project is to assist ASL users in their interactions with computers and gaming systems. The drawback of this system is the lack of individual finger tracking. The hands are tracked as points, and so much information is lost. Some signs have similar hand motions but different hand poses and finger motions; for example, the signs “MORE” and “SWEETHEART” are similar, as shown in Figure \ref{fig:MORE}. 
 
 \begin{figure}[h!]
   \centering
@@ -59,12 +57,13 @@ Furthermore, a recent project developed by Microsoft Research Asia and the Insti
   \label{fig:MORE}
 \end{figure}
 
-The above examples represent only a small sampling of approaches that have been taken to solve the problem. Other techniques used for ASL recognition include Bayesian networks, [7] neural networks, [8] support vector machines [9] and several examples of Hidden Markov Models. [10][11] Some have also attempted to incorporate non-manual markers, small gestures of the face, eyebrows and shoulders meant to convey grammar and context, using face detection and computer vision techniques. [12]
+The above examples represent only a small sampling of approaches that have been taken to solve the problem. Other techniques used for ASL recognition include Bayesian networks, \cite{Shira} neural networks, \cite{Oz} support vector machines \cite{Agarwal} and several examples of Hidden Markov Models. \cite{Elmezain}\cite{Moni} Some have also attempted to incorporate non-manual markers, small gestures of the face, eyebrows and shoulders meant to convey grammar and context, using face detection and computer vision techniques. \cite{Liu}
 
 \subsection{Scope}
 This project encompasses the detection and tracking of a user's hand and finger gestures with the aim of developing an algorithm to be used in the automated detection of ASL as a teaching tool for learning ASL as a second language. To accommodate a group size of two members, and a time constraint of less than eight months, the project scope has been limited to the implementation of an existing hand- and finger-detection system and the development of a real-time gesture-recognition algorithm. Third-party solutions, such as existing hand- and finger-tracking or machine learning libraries, will be included as compnonents wherever possible. 
 
 Due to the constraints of this project, some or all of the following simplifying assumptions will be applied:
+
 \begin{enumerate*}
   \item The user interface will be minimal but will illustrate the basic structure of the tool, including demonstrating signs and testing the user. 
   \item The background of the user will be simplified or uniform, such as a blank wall. 
@@ -78,11 +77,10 @@ Due to the constraints of this project, some or all of the following simplifying
 \subsection{Objectives}
 Our main goal is to demonstrate the technical feasibilty of an ASL teaching tool. From this perspective, our main objectives are to build a classification system that could reliably function as the backend to such a tool and provide an interface by which other developers could create applications. As a secondary objective, we would also construct a simple vocabulary game, to demonstrate the potential of the platform.
 
-\begin{table}[h!]
+\begin{table}[H]
 \centering
 \caption{Objectives}
 \label{table:Objectives}
-\vspace{1em}
 \begin{tabular}{|c| p{14cm} |}
 	\hline
 	O.1 & Create a classification model that is accurate and robust \\ \hline
@@ -93,11 +91,10 @@ Our main goal is to demonstrate the technical feasibilty of an ASL teaching tool
 \subsection{Requirements}
 The requirements outlined below in Table \ref{table:Requirements} are the result of literature review. They are tentative and are expected to undergo revision on the completion of interviews with potential users and stakeholders. The Regional Information Officer for the Canadian Hearing Society in Kitchener-Waterloo has contacted an ASL instructor from Conestoga College on our behalf.
 
-\begin{table}[h!]
+\begin{table}[H]
 \centering
 \caption{Requirements}
 \label{table:Requirements}
-\vspace{1em}
 \begin{tabular}{|c| p{14cm} |}
 	\hline
 	R.1 & The video frame must encompass the body parts and surrounding area used when signing, i.e. the signer’s hands, head and shoulders. \\ \hline
@@ -113,11 +110,10 @@ The requirements outlined below in Table \ref{table:Requirements} are the result
 \subsection{Constraints}
 The constraints on this project are described below in Table \ref{table:Constraints}. Constraints 3 and 4 necessitate allocating a large amount of time to research.
 
-\begin{table}[h!]
+\begin{table}[H]
 \centering
 \caption{Constraints}
 \label{table:Constraints}
-\vspace{1em}
 \begin{tabular}{|c| p{14cm} |}
 	\hline
 	C.1 & Limited time; the project must be completed by March, 2014, while group members have additional obligations for courses and extracurriculars. \\ \hline
@@ -167,16 +163,15 @@ The hand-tracking libraries in Table \ref{table:libraries} were investigated. Th
 \centering
 \caption{Hand-Tracking LIbraries}
 \label{table:libraries}
-\vspace{1em}
 \begin{tabular}{|p{5cm}| p{11cm} |}
 \hline
 \textbf{Name/Company} & \textbf{Capabilities} \\ \hline
-3D Hand Tracking by The Foundation for Research and Technology-Hellas (FORTH) [3] &
+3D Hand Tracking by The Foundation for Research and Technology-Hellas (FORTH) \cite{forth} &
 Creates a model of the hand that is capable of tracking individual fingers without losing them when out of site.
 Advertises no calibration required \\ \hline
-TuioKinect hand tracker for Kinect [4] &
+TuioKinect hand tracker for Kinect \cite{tuio} &
 Can recognize large hand gestures but does not have individual finger recognition. \\ \hline
-Hand Kinetics [5]  &
+Hand Kinetics \cite{kinetics}  &
 Hand and segment model created with classifiers appears to capture fingers very well. Not yet commercially available. \\ \hline
 \end{tabular}
 \end{table}
@@ -209,23 +204,23 @@ Initially, markers (pink and green in the above figure) were to be made using fa
 
 In order to determine the best colours to use for the gloves and fingertip markers, colour separability was examined in YCbCr, a colour spaces that separates illumination from chroma. This is important for robustness across illumination (Requirement 7). 
 
-\begin{figure}[h]
+\begin{figure}[H]
   \centering
   \includegraphics[scale=1]{YUV.png}
   \caption{CbCr Plane at Y = 0.5}
   \label{fig:YUV}
 \end{figure}
 
-According to the graph, the most separable colours should be red, green, magenta and blue. Colours of this purity are not available as materials, and so testing was done to identify the most separable colours independent of lighting. Seven different colours were tested (six as fingertip caps, and one as the glove colour).
+According to the Figure \ref{fig:YUV}, the most separable colours should be red, green, magenta and blue. Colours of this purity are not available as materials, and so testing was done to identify the most separable colours independent of lighting. Seven different colours were tested (six as fingertip caps, and one as the glove colour).
 
-\begin{figure}[h]
+\begin{figure}[H]
   \centering
-  \includegraphics[scale=1]{LightTest.png}
+  \includegraphics[scale=0.75]{LightTest.png}
   \caption{Illumination Tests}
   \label{fig:light}
 \end{figure}
 
-Images in four different illumination settings (ambient, dark ambient, back-lit and front-lit) were used to calculate test means for each colour based on 900 sample pixels. (Figure \ref{light}) A second test image for each illumination was then used to classify colours based on euclidian distance to the test means. The resulting confusion matrices can be found in Appendix A. Figure \ref{fig:YUVTest} shows a visualization of the location of 900 samples in one test image in the CbCr space. 
+Images in four different illumination settings (ambient, dark ambient, back-lit and front-lit) were used to calculate test means for each colour based on 900 sample pixels. (Figure \ref{fig:light}) A second test image for each illumination was then used to classify colours based on euclidian distance to the test means. The resulting confusion matrices can be found in Appendix A. Figure \ref{fig:YUVTest} shows a visualization of the location of 900 samples in one test image in the CbCr space. 
 
 \begin{figure}[h]
   \centering
@@ -277,7 +272,7 @@ As can be seen in the research, there is no shortage of well-studied labelled cl
 
 In our initial prototype, we chose to classify signs based solely on individual frames. This allows us to classify ‘static’ signs such as the letters of the ASL alphabet but it is not sufficient to classify motion-based signs, including most vocabulary words. We hope to be able to recognize motion-based signs in future prototypes. 
 
-Building a classifier also required us to construct a library of labelled data. To construct the library, each of the developers recorded a series of short fakenect data samples of themselves signing single letters while wearing the glove in various lighting conditions. Due to the amount of time required to record this data, we chose to limit ourselves to recognizing only a subset of the alphabet. Our current library includes the letters: A, B, C, E, F, G, H, M, and N. This recorded library if used by the classifier to “learn” the feature vectors associated with these labels, a process known as training.  
+Building a classifier also required us to construct a library of labelled data. To construct the library, each of the developers recorded a series of short fakenect data samples of themselves signing single letters while wearing the glove in various lighting conditions. Due to the amount of time required to record this data, we chose to limit ourselves to recognizing only a subset of the alphabet. Our current library includes the letters: A, B, C, E, F, G, H, M, and N. This recorded library is used by the classifier to “learn” the feature vectors associated with these labels, a process known as training.  
 
 \subsubsection{Model Validation}
 There are several metrics by which we can determine the predictive skill of a classifier. The simplest is accuracy, which here refers to the percentage of correctly classified signs within some sample set. For each class, we can also measure the precision and recall, defined as:
@@ -320,9 +315,7 @@ Using a kernel function maps the training set into a higher dimensional feature 
 
 When building a classifier, it is necessary to choose a C parameter, a kernel function, and, if necessary, a \(\gamma\) that maximizes the predictive skill of the classifier. We chose to use a grid-search method to automate this process. In grid search, a series of possible values are selected for each parameter. The classifier is trained using every combination of these parameters and the classifier selected is the one with the best cross-validated accuracy. 
 
-The parameter search space is given in Table \ref{table:gridsearch}. For kernel functions, we used only the linear and radial basis function kernels. Both C and gamma increase by powers of ten, searching a wide range but using only a handful of values. Grid search is run every time a new classifier is constructed. Results for individual trials are given in Appendix B.
-
-\begin{table}
+\begin{table}[H]
 \centering
 \caption{Grid Search Parameter Values}
 \label{table:gridsearch}
@@ -335,6 +328,8 @@ kernal & \textit{linear}, \textit{rbf} \\ \hline
 \hline
 \end{tabular}
 \end{table}
+
+The parameter search space is given in Table \ref{table:gridsearch}. For kernel functions, we used only the linear and radial basis function kernels. Both C and gamma increase by powers of ten, searching a wide range but using only a handful of values. Grid search is run every time a new classifier is constructed. Results for individual trials are given in Appendix B.
 
 \subsubsection{Selection of Features}
 After processing the input from the Kinect, we are left with a binary image of the glove markers. The next task is to develop some meaningful set of features describing the binary image, for use in classification. Possible features include the size and shape of the binary blobs or the positions and relatives distances of blob centroids as well as more complex image processing features such as eigenvectors, Haar-like features, and Fourier descriptors. We chose to begin by testing the predictive skill of some simple shape descriptors.
@@ -358,7 +353,7 @@ We use the central normalized moments, \({n\mu}_{pq}\), which have been normaliz
 
 Hu moments are another set of image moments, notable for being rotation-invariant in addition to shift- and scale-invariant. The first seven Hu moments are calculated from the first seven normalized central moments.
 
-The Zernike moments are constructed from the Zernike polynomials and designed to be completely orthogonal. They have been shown to outperform other descriptors in terms of information redundancy and image representation. \dothis{(Ref)} The first seven moments are constructed as follows:
+The Zernike moments are constructed from the Zernike polynomials and designed to be completely orthogonal. They have been shown to outperform other descriptors in terms of information redundancy and image representation. \cite{Teh} The first seven moments are constructed as follows:
 \begin{equation*}
 A_{mn} = \frac{m+1}{\pi} \int_x \int_y f(x,y){\left [{V_mn}(x,y) \right ]}^* dxdy \text{\: \:where\: } x^2 + y^2 \leq 1
 \end{equation*}
@@ -374,14 +369,14 @@ The teaching tool system detects the satisfactory completion of a sign. This sys
 
 By March 2014, a simple call-and-response vocabulary game will be created to exemplify a possible use of the system. Figures \ref{fig:ui1} and \ref{fig:ui2} demonstrate how the user will interact with the game.
 
-\begin{figure}[h]
+\begin{figure}[H]
   \centering
   \includegraphics[scale=1]{Mother.png}
   \caption{UI Mockup: Prompting }
   \label{fig:ui1}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[H]
   \centering
   \includegraphics[scale=1]{Mother2.png}
   \caption{UI Mockup: Feedback}
@@ -406,6 +401,7 @@ Individual contributions and future responsibilities of each group member can be
 
 \subsection{Progress}
 The milestones listed below have been completed. Video preprocessing methods include the glove design as well as colour detection, filtering and testing. The approval of this application is necessary to commence gathering video data from potential users other than the project group members. The same application encompasses user testing to assess the usability and educational value of the final prototype. The initial review has already been received and the necessary edited documents have been re-submitted. Approval is anticipated for January.
+
 \begin{enumerate*}
   \item Revised design requirements
   \item Selection of hardware
@@ -460,7 +456,6 @@ Hardware (personal computers and Kinect camera) were possessed by group members 
 \centering
 \caption{Budget}
 \label{table:Budget}
-\vspace{1em}
 \begin{tabular}{l r}
 
 \textbf{Item}  & \textbf{Cost} \\ \hline
@@ -487,7 +482,6 @@ Progress on the project includes the selection of the Microsoft Kinect as the ha
 During the Winter 2013 term, focus will be on extending the system to function for dynamic ASL signs. Large amounts of user data will be collected in order to improve the classifier performance. Additional features and classification methods will be tested. A simple user interface in the form of a vocabulary game will be created for the final prototype, which will undergo user acceptance testing.
 
 The project management methods implemented throughout the Fall 2013 term have been successful and will continue for the duration of the project. 
-
 \newpage
 \onehalfspacing
 \tocsection{References}
@@ -497,12 +491,185 @@ The project management methods implemented throughout the Fall 2013 term have be
 
 
 \newpage
-\tocsection{Appendix A - \dothis{Thing}}
+\tocsection{Appendix A - Colour Testing Confusion Matrices}
+The results of two trials for colour classification in each lighting scenario are summarized here as confusion matrices. 
+\subsection*{Ambient}
+\begin{center}
+    \begin{tabular}{r|ccccccc}
+	& \multicolumn{7}{c}{Actual} \\ 
+    Prediction & Dgreen & Red & Yellow & Purple & Pink & Lgreen & Blue \\ \hline
+    Dgreen & 24     & 0   & 0      & 0      & 0    & 376    & 0    \\
+    Red    & 0      & 364 & 0      & 0      & 36   & 0      & 0    \\
+    Yellow & 0      & 0   & 400    & 0      & 0    & 0      & 0    \\
+    Purple & 0      & 0   & 0      & 400    & 0    & 0      & 0    \\
+    Pink   & 0      & 82  & 0      & 0      & 318  & 0      & 0    \\
+    Lgreen & 5      & 0   & 0      & 0      & 0    & 395    & 0    \\
+    Blue   & 0      & 0   & 0      & 0      & 0    & 0      & 400  \\
+    \end{tabular}
+
+\vspace{1em}
+
+    \begin{tabular}{r|ccccccc}
+	& \multicolumn{7}{c}{Actual} \\ 
+    Prediction  & Dgreen & Red & Yellow & Purple & Pink & Lgreen & Blue \\ \hline
+    Dgreen & 1      & 0   & 0      & 0      & 0    & 399    & 0    \\
+    Red    & 0      & 315 & 0      & 0      & 85   & 0      & 0    \\
+    Yellow & 0      & 0   & 400    & 0      & 0    & 0      & 0    \\
+    Purple & 0      & 0   & 0      & 400    & 0    & 0      & 0    \\
+    Pink   & 0      & 96  & 0      & 0      & 304  & 0      & 0    \\
+    Lgreen & 14     & 0   & 0      & 0      & 0    & 386    & 0    \\
+    Blue   & 0      & 0   & 0      & 0      & 0    & 0      & 400  \\
+    \end{tabular}
+\end{center}
+
+\subsection*{Dark Ambient}
+\begin{center}
+    \begin{tabular}{r|ccccccc}
+	& \multicolumn{7}{c}{Actual} \\ 
+    Prediction      & Dgreen & Red & Yellow & Purple & Pink & Lgreen & Blue \\ \hline
+    Dgreen & 311    & 0   & 0      & 0      & 0    & 89     & 0    \\
+    Red    & 0      & 400 & 0      & 0      & 0    & 0      & 0    \\
+    Yellow & 0      & 0   & 400    & 0      & 0    & 0      & 0    \\
+    Purple & 0      & 0   & 0      & 399    & 1    & 0      & 0    \\
+    Pink   & 0      & 400 & 0      & 0      & 0    & 0      & 0    \\
+    Lgreen & 196    & 0   & 13     & 0      & 0    & 191    & 0    \\
+    Blue   & 0      & 0   & 0      & 13     & 0    & 0      & 387  \\
+    \end{tabular}
+
+\vspace{1em}
+
+    \begin{tabular}{r|ccccccc}
+	& \multicolumn{7}{c}{Actual} \\ 
+    Prediction      & Dgreen & Red & Yellow & Purple & Pink & Lgreen & Blue \\ \hline
+    Dgreen & 305    & 0   & 0      & 0      & 0    & 95     & 0    \\
+    Red    & 0      & 400 & 0      & 0      & 0    & 0      & 0    \\
+    Yellow & 0      & 0   & 400    & 0      & 0    & 0      & 0    \\
+    Purple & 0      & 7   & 0      & 390    & 3    & 0      & 0    \\
+    Pink   & 0      & 400 & 0      & 0      & 0    & 0      & 0    \\
+    Lgreen & 180    & 0   & 146    & 0      & 0    & 74     & 0    \\
+    Blue   & 25     & 0   & 0      & 343    & 0    & 28     & 4    \\
+    \end{tabular}
+\end{center}
+
+\subsection*{Backlit}
+\begin{center}
+    \begin{tabular}{r|ccccccc}
+	& \multicolumn{7}{c}{Actual} \\ 
+    Prediction      & Dgreen & Red & Yellow & Purple & Pink & Lgreen & Blue \\ \hline
+    Dgreen & 397    & 0   & 3      & 0      & 0    & 0      & 0    \\
+    Red    & 0      & 395 & 0      & 0      & 5    & 0      & 0    \\
+    Yellow & 0      & 0   & 400    & 0      & 0    & 0      & 0    \\
+    Purple & 9      & 41  & 1      & 348    & 1    & 0      & 0    \\
+    Pink   & 0      & 255 & 0      & 0      & 145  & 0      & 0    \\
+    Lgreen & 150    & 0   & 250    & 0      & 0    & 0      & 0    \\
+    Blue   & 348    & 0   & 0      & 15     & 0    & 37     & 0    \\
+    \end{tabular}
+
+\vspace{1em}
+
+    \begin{tabular}{r|ccccccc}
+	& \multicolumn{7}{c}{Actual} \\ 
+    Prediction      & Dgreen & Red & Yellow & Purple & Pink & Lgreen & Blue \\ \hline
+    Dgreen & 399    & 0   & 0      & 1      & 0    & 0      & 0    \\
+    Red    & 0      & 395 & 0      & 0      & 5    & 0      & 0    \\
+    Yellow & 3      & 1   & 395    & 0      & 0    & 1      & 0    \\
+    Purple & 8      & 45  & 2      & 340    & 4    & 0      & 1    \\
+    Pink   & 0      & 267 & 1      & 0      & 132  & 0      & 0    \\
+    Lgreen & 119    & 0   & 275    & 0      & 0    & 6      & 0    \\
+    Blue   & 372    & 0   & 0      & 1      & 0    & 27     & 0    \\
+    \end{tabular}
+\end{center}
+
+\subsection*{Frontlit}
+\begin{center}
+    \begin{tabular}{r|ccccccc}
+	& \multicolumn{7}{c}{Actual} \\ 
+    Prediction      & Dgreen & Red & Yellow & Purple & Pink & Lgreen & Blue \\ \hline
+    Dgreen & 0      & 0   & 0      & 0      & 0    & 400    & 0    \\
+    Red    & 0      & 400 & 0      & 0      & 0    & 0      & 0    \\
+    Yellow & 0      & 0   & 400    & 0      & 0    & 0      & 0    \\
+    Purple & 0      & 0   & 0      & 0      & 400  & 0      & 0    \\
+    Pink   & 0      & 103 & 0      & 0      & 297  & 0      & 0    \\
+    Lgreen & 0      & 0   & 400    & 0      & 0    & 0      & 0    \\
+    Blue   & 0      & 0   & 0      & 0      & 0    & 0      & 400  \\
+    \end{tabular}
+
+\vspace{1em}
+
+    \begin{tabular}{r|ccccccc}
+	& \multicolumn{7}{c}{Actual} \\ 
+    Prediction      & Dgreen & Red & Yellow & Purple & Pink & Lgreen & Blue \\ \hline
+    Dgreen & 0      & 0   & 0      & 0      & 0    & 400    & 0    \\
+    Red    & 0      & 400 & 0      & 0      & 0    & 0      & 0    \\
+    Yellow & 0      & 0   & 400    & 0      & 0    & 0      & 0    \\
+    Purple & 0      & 0   & 0      & 0      & 400  & 0      & 0    \\
+    Pink   & 0      & 115 & 0      & 0      & 285  & 0      & 0    \\
+    Lgreen & 0      & 0   & 400    & 0      & 0    & 0      & 0    \\
+    Blue   & 0      & 0   & 0      & 0      & 0    & 0      & 400  \\
+    \end{tabular}
+\end{center}
 
 \newpage
-\tocsection{Appendix B - \dothis{Thing}}
+\tocsection{Appendix B - Classifier Training Results}
+
+\subsection*{Central Moments}
+\begin{center}
+	\begin{tabular}{l|c}
+	Cross-Validated Accuracy & 0.955\\
+	Test Accuracy & 0.957\\
+	\end{tabular}
+
+\vspace{1em}
+
+    \begin{tabular}{c|ccccccccc}
+	& \multicolumn{9}{c}{Actual} \\ 
+     Prediction         & A     & B     & C     & E     & F     & G     & H     & M     & N     \\ \hline
+    A         & 558   & 0     & 0     & 0     & 0     & 0     & 0     & 0     & 0     \\
+    B         & 0     & 755   & 1     & 0     & 0     & 0     & 0     & 0     & 0     \\
+    C         & 0     & 0     & 151   & 0     & 0     & 0     & 0     & 0     & 0     \\
+    E         & 0     & 0     & 0     & 650   & 0     & 0     & 0     & 45    & 3     \\
+    F         & 0     & 3     & 1     & 0     & 770   & 0     & 0     & 0     & 0     \\
+    G         & 0     & 0     & 0     & 0     & 0     & 877   & 5     & 0     & 0     \\
+    H         & 0     & 0     & 0     & 0     & 0     & 17    & 710   & 0     & 0     \\
+    M         & 0     & 0     & 0     & 55    & 0     & 0     & 0     & 554   & 70    \\
+    N         & 0     & 0     & 0     & 2     & 0     & 0     & 0     & 54    & 707   \\
+    ~         & ~     & ~     & ~     & ~     & ~     & ~     & ~     & ~     & ~     \\
+    Precision & 1.000 & 0.999 & 1.000 & 0.931 & 0.995 & 0.994 & 0.977 & 0.816 & 0.927 \\
+    Recall    & 1.000 & 0.996 & 0.987 & 0.919 & 1.000 & 0.981 & 0.993 & 0.848 & 0.906 \\
+    \end{tabular}
+\end{center}
+
+\newpage
+\subsection*{Hu Moments}
+
+\begin{center}
+	\begin{tabular}{l|c}
+	Cross-Validated Accuracy & 0.587 \\
+	Test Accuracy & 0.590 \\
+	\end{tabular}
+
+\vspace{1em}
+
+    \begin{tabular}{c|ccccccccc}
+	& \multicolumn{9}{c}{Actual} \\ 
+     Prediction         & A     & B     & C     & E     & F     & G     & H     & M     & N     \\ \hline
+    A         & 504   & 0     & 0     & 0     & 29    & 43    & 42    & 0     & 0     \\
+    B         & 0     & 681   & 6     & 231   & 38    & 17    & 0     & 83    & 199   \\
+    C         & 0     & 0     & 0     & 0     & 0     & 0     & 0     & 0     & 0     \\
+    E         & 0     & 2     & 1     & 279   & 1     & 1     & 0     & 186   & 213   \\
+    F         & 0     & 14    & 72    & 25    & 499   & 96    & 0     & 50    & 22    \\
+    G         & 10    & 57    & 28    & 2     & 167   & 699   & 186   & 68    & 2     \\
+    H         & 44    & 0     & 0     & 0     & 0     & 26    & 487   & 0     & 0     \\
+    M         & 0     & 2     & 1     & 98    & 0     & 12    & 0     & 99    & 55    \\
+    N         & 0     & 2     & 45    & 72    & 36    & 0     & 0     & 167   & 289   \\
+    ~         & ~     & ~     & ~     & ~     & ~     & ~     & ~     & ~     & ~     \\
+    Precision & 0.816 & 0.543 & nan   & 0.408 & 0.641 & 0.573 & 0.874 & 0.371 & 0.473 \\
+    Recall    & 0.903 & 0.898 & 0.000 & 0.395 & 0.648 & 0.782 & 0.681 & 0.152 & 0.371 \\
+    \end{tabular}
+\vspace{1em}
 
 
 
+\end{center}
 
 \end{document}
