@@ -28,13 +28,13 @@ if __name__ == "__main__":
 
             greenhull = green.getColourHull(imbgr)
 
-            bluehull = blue.getColourHull(imbgr)
+            bluecentroid = blue.getColourCentroid(imbgr)
             
             imgray = cv2.cvtColor(imbgr,cv.CV_BGR2GRAY)
 
             cv2.drawContours(imgray,[greenhull],-1,(255,0,0),2)
 
-            cv2.drawContours(imgray,[bluehull],-1,(0,0,0),2)
+            cv2.circle(imgray,tuple([int(bluecentroid[0]),int(bluecentroid[1])]),3,(255,0,0),3)
 
             cv2.imshow('Filtered', imgray)
 

@@ -31,6 +31,30 @@ class colourFilter:
         self.high = high
 
     def getColourHull(self,imbgr):
+        contours = self.getColourContours(imbgr)
+        if len(contours):
+            mergeContour = contours[0]
+            for i in contours[1:]:
+                mergeContour = np.concatenate((mergeContour,i))
+
+            return cv2.convexHull(mergeContour)
+        else:
+            return np.array([])
+
+    def getColourCentroid(self,imbgr):
+        contours = self.getColourContours(imbgr)
+        if len(contours):
+            centroid_numerator = np.array([0,0])
+            centroid_denominator = 0.0
+            for cnt in contours:
+                moments = cv2.moments(cnt)
+                centroid_denominator += moments['m00'] 
+                centroid_numerator += [moments['m10'],moments['m01']] 
+            return centroid_numerator / centroid_denominator
+        else:
+            return np.array([])
+
+    def getColourContours(self,imbgr):
         imycrcb = cv2.cvtColor(imbgr,cv.CV_BGR2YCrCb)
         imfilter = cv2.inRange(imycrcb,self.low,self.high)
         mask = np.zeros(np.add(imfilter.shape,[2,2]),dtype="uint8")
@@ -42,15 +66,7 @@ class colourFilter:
         imfilter = cv2.medianBlur(imfilter,3)
 
         contours, hierarchy = cv2.findContours(imfilter,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-
-        if len(contours):
-            mergeContour = contours[0]
-            for i in contours[1:]:
-                mergeContour = np.concatenate((mergeContour,i))
-
-            return cv2.convexHull(mergeContour)
-        else:
-            return np.array([])
+        return contours
 
 def getCentralMoments(hull):
     if len(hull):
