@@ -1,5 +1,7 @@
 import numpy as np
 import featureExtraction as extract
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 import cv
 import cv2
 import sys
@@ -23,31 +25,39 @@ if __name__ == "__main__":
         red = extract.colourFilter(tuple(low),tuple(high))
 
 
+    plt.ion()
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+
     while 1:
         try:
             #cv.ShowImage('Depth', get_depth())
             imbgr = extract.get_video()
-            #imbgr = imbgr[5:-5,5:-5]
+            imdepth = extract.get_depth()
             
             cv2.imshow("Original",imbgr)
 
             greenhull = green.getColourHull(imbgr)
             redhull = red.getColourHull(imbgr)
 
-            rightcentroid = green.getCombinedCentroid(imbgr, blue,'Right')
-            leftcentroid = red.getCombinedCentroid(imbgr, blue,'Left')
+            #rightcentroid = green.getCombinedCentroid(imbgr, blue,'Right')
+            #leftcentroid = red.getCombinedCentroid(imbgr, blue,'Left')
             
             imgray = cv2.cvtColor(imbgr,cv.CV_BGR2GRAY)
             imgray2 = cv2.cvtColor(imgray,cv.CV_GRAY2BGR)
 
             cv2.drawContours(imgray2,[greenhull],-1,(255,0,0),2)
-
             cv2.drawContours(imgray2,[redhull],-1,(255,0,0),2)
 
-            if rightcentroid:
-                cv2.circle(imgray2,rightcentroid,3,(255,0,0),3)
-            if leftcentroid:
-                cv2.circle(imgray2,leftcentroid,3,(255,0,0),3)
+            lefthand = extract.getCentroidPosition(imbgr,imdepth,red,blue)
+            righthand = extract.getCentroidPosition(imbgr,imdepth,green,blue)
+
+            ax.scatter(lefthand[0],lefthand[1],lefthand[2],c='r')
+            ax.scatter(righthand[0],righthand[1],righthand[2],c='g')
+            plt.draw()
+
+            print str(lefthand) + "    " + str(righthand)
 
             cv2.imshow('Filtered', imgray2)
 

@@ -58,6 +58,11 @@ class colourFilter:  #need to memoize some of these operations somehow
         imfilter = cv2.medianBlur(immask,7)
         imfilter = cv2.medianBlur(imfilter,5)
         imfilter = cv2.medianBlur(imfilter,3)
+
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(5,5))
+
+        imfilter = cv2.dilate(imfilter,kernel)
+        imfilter = cv2.erode(imfilter,kernel)
         return imfilter
 
     def getColourContours(self,imbgr):
@@ -67,9 +72,10 @@ class colourFilter:  #need to memoize some of these operations somehow
         contours, hierarchy = cv2.findContours(imfilter,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
         return contours
 
-    def getCombinedCentroid(self, imbgr, blue,name):
+    def getCombinedCentroid(self, imbgr, blue):
         imfilter = self.inRange(imbgr) + blue.inRange(imbgr)
         imfilter = self.blobSmoothing(imfilter)
+
         contours, hierarchy = cv2.findContours(imfilter,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
         start = self.getStartingPoint(imbgr)
 
@@ -81,6 +87,12 @@ class colourFilter:  #need to memoize some of these operations somehow
             if moments['m00'] > 0:
                 return (int(moments['m10']/moments['m00']),int(moments['m01']/moments['m00'])) 
         return tuple([])
+
+def getCentroidPosition(imbgr,imdepth,startColour,adjacentColour):
+    centroid = startColour.getCombinedCentroid(imbgr, adjacentColour)
+    if centroid:
+        return np.append(centroid,imdepth[centroid[::-1]])
+    return np.array([0,0,0])
 
 def getCentralMoments(hull):
     if len(hull):
