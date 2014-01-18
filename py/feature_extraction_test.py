@@ -18,6 +18,11 @@ if __name__ == "__main__":
         high = [ float(x) for x in reader.next()]
         blue = extract.colourFilter(tuple(low),tuple(high))
 
+	low = [ float(x) for x in reader.next()]
+        high = [ float(x) for x in reader.next()]
+        red = extract.colourFilter(tuple(low),tuple(high))
+
+
     while 1:
         try:
             #cv.ShowImage('Depth', get_depth())
@@ -27,8 +32,12 @@ if __name__ == "__main__":
             cv2.imshow("Original",imbgr)
 
             greenhull = green.getColourHull(imbgr)
+	    redhull = red.getColourHull(imbgr)
 
-            bluecentroid = blue.getColourCentroid(imbgr)
+           # bluecentroid = blue.getColourCentroid(imbgr)
+
+	   # rightcentroid = green.getCombinedCentroid(imbgr, blue)
+	   # leftcentroid = red.getCombinedCentroid(imbgr, blue)
             
             imgray = cv2.cvtColor(imbgr,cv.CV_BGR2GRAY)
 

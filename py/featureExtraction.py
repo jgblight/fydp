@@ -68,6 +68,20 @@ class colourFilter:
         contours, hierarchy = cv2.findContours(imfilter,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
         return contours
 
+#    def getCombinedCentroid(self, imbgr, blue):
+#	hand = self
+#	while adjacent = true
+# 		ajacentcheck = false
+#		for point in hand
+#			pointVicinity = [point+(0,1), point+(0,-1), point+(1,0), point+(-1,0)]
+#			if any point in point vicinity is in blue
+#				add point to hand
+#				adjacentcheck = true	
+#		if adjacentcheck == false
+#			adjacent = false
+#	combinedcentroid = centroid of hand		 				
+#	return combinedcentroid
+
 def getCentralMoments(hull):
     if len(hull):
         m = cv2.moments(hull)
