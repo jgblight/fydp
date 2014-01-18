@@ -104,7 +104,7 @@ def calibrate(recordpath):
         writer = csv.writer(csvfile)
         getColourRange(imbgr,writer,"Green")
         getColourRange(imbgr,writer,"Blue")
-	getColourRange(imbgr,writer,"Red")
+        getColourRange(imbgr,writer,"Red")
 
 
 

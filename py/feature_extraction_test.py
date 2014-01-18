@@ -18,7 +18,7 @@ if __name__ == "__main__":
         high = [ float(x) for x in reader.next()]
         blue = extract.colourFilter(tuple(low),tuple(high))
 
-	low = [ float(x) for x in reader.next()]
+        low = [ float(x) for x in reader.next()]
         high = [ float(x) for x in reader.next()]
         red = extract.colourFilter(tuple(low),tuple(high))
 
@@ -32,20 +32,24 @@ if __name__ == "__main__":
             cv2.imshow("Original",imbgr)
 
             greenhull = green.getColourHull(imbgr)
-	    redhull = red.getColourHull(imbgr)
+            redhull = red.getColourHull(imbgr)
 
-           # bluecentroid = blue.getColourCentroid(imbgr)
-
-	   # rightcentroid = green.getCombinedCentroid(imbgr, blue)
-	   # leftcentroid = red.getCombinedCentroid(imbgr, blue)
+            rightcentroid = green.getCombinedCentroid(imbgr, blue,'Right')
+            leftcentroid = red.getCombinedCentroid(imbgr, blue,'Left')
             
             imgray = cv2.cvtColor(imbgr,cv.CV_BGR2GRAY)
+            imgray2 = cv2.cvtColor(imgray,cv.CV_GRAY2BGR)
 
-            cv2.drawContours(imgray,[greenhull],-1,(255,0,0),2)
+            cv2.drawContours(imgray2,[greenhull],-1,(255,0,0),2)
 
-            cv2.circle(imgray,tuple([int(bluecentroid[0]),int(bluecentroid[1])]),3,(255,0,0),3)
+            cv2.drawContours(imgray2,[redhull],-1,(255,0,0),2)
 
-            cv2.imshow('Filtered', imgray)
+            if rightcentroid:
+                cv2.circle(imgray2,rightcentroid,3,(255,0,0),3)
+            if leftcentroid:
+                cv2.circle(imgray2,leftcentroid,3,(255,0,0),3)
+
+            cv2.imshow('Filtered', imgray2)
 
         except KeyboardInterrupt:
             break
