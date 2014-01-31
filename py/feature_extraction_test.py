@@ -12,10 +12,11 @@ if __name__ == "__main__":
         reader = csv.reader(csvfile)
         low = [ float(x) for x in reader.next()]
         high = [ float(x) for x in reader.next()]
-        print low
-        print high
+        green = extract.colourFilter(tuple(low),tuple(high))
 
-    green = extract.colourFilter(tuple(low),tuple(high))
+        low = [ float(x) for x in reader.next()]
+        high = [ float(x) for x in reader.next()]
+        blue = extract.colourFilter(tuple(low),tuple(high))
 
     while 1:
         try:
@@ -25,24 +26,16 @@ if __name__ == "__main__":
             
             cv2.imshow("Original",imbgr)
 
-            hull = green.getColourHull(imbgr)
+            greenhull = green.getColourHull(imbgr)
+
+            bluecentroid = blue.getColourCentroid(imbgr)
             
             imgray = cv2.cvtColor(imbgr,cv.CV_BGR2GRAY)
 
-            cv2.drawContours(imgray,[hull],-1,(255,0,0),2)
+            cv2.drawContours(imgray,[greenhull],-1,(255,0,0),2)
 
+            cv2.circle(imgray,tuple([int(bluecentroid[0]),int(bluecentroid[1])]),3,(255,0,0),3)
 
-            #cvFilter = toCVMat(imfilter,1)
-            #imlabel = cv.CreateImage((imfilter.shape[1],imfilter.shape[0]),cvblob.IPL_DEPTH_LABEL, 1)
-            #blobs = cvblob.Blobs()
-            #result = cvblob.Label(cvFilter,imlabel,blobs)
-            #print result
-            #print len(blobs.keys())
-
-
-                #cv2.rectangle(imgray,(leftmost,topmost),(rightmost,bottommost),(255,255,255))
-
-            print extract.getFeatureVector(hull)
             cv2.imshow('Filtered', imgray)
 
         except KeyboardInterrupt:
