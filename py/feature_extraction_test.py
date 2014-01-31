@@ -25,6 +25,7 @@ if __name__ == "__main__":
 
         low = [ float(x) for x in reader.next()]
         high = [ float(x) for x in reader.next()]
+	print "low: " + str(low) + " high: " + str(high)
         red = extract.colourFilter(tuple(low),tuple(high))
 
 

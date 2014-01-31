@@ -15,12 +15,12 @@ if __name__ == "__main__":
 	greencalibrated = False	
 	redcalibrated = False
 
-	gLow = [50, 111.345, 93.098]
-	gHigh = [200, 119.019, 109.922]
-	bLow = [50, 89.749, 164.108]
-	bHigh = [200, 102.780, 176.401]
-	rLow = [50, 167.326, 108.997]
-	rHigh = [200, 215.588, 131.099]
+	gLow = [50, 112, 94]
+	gHigh = [200, 118, 107]
+	bLow = [50, 90, 165]
+	bHigh = [200, 101, 174]
+	rLow = [50, 168, 109]
+	rHigh = [200, 214, 130]
 
 while 1:
 	try:
