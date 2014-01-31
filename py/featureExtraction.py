@@ -24,7 +24,7 @@ def toCVMat(im,channels):
                im.dtype.itemsize * channels * im.shape[1])
     return image
 
-class colourFilter:
+class colourFilter:  #need to memoize some of these operations somehow
 
     def __init__(self,low,high):
         self.low = low
@@ -41,32 +41,58 @@ class colourFilter:
         else:
             return np.array([])
 
-    def getColourCentroid(self,imbgr):
-        contours = self.getColourContours(imbgr)
+    def getStartingPoint(self,imbgr):
+        contours = self.getColourContours(imbgr) 
         if len(contours):
-            centroid_numerator = np.array([0,0])
-            centroid_denominator = 0.0
-            for cnt in contours:
-                moments = cv2.moments(cnt)
-                centroid_denominator += moments['m00'] 
-                centroid_numerator += [moments['m10'],moments['m01']] 
-            return centroid_numerator / centroid_denominator
-        else:
-            return np.array([])
+            moments = cv2.moments(contours[0])
+            if moments['m00'] > 0:
+                return (int(moments['m10']/moments['m00']),int(moments['m01']/moments['m00'])) 
+        return tuple([])
 
-    def getColourContours(self,imbgr):
+    def inRange(self,imbgr):
         imycrcb = cv2.cvtColor(imbgr,cv.CV_BGR2YCrCb)
         imfilter = cv2.inRange(imycrcb,self.low,self.high)
-        mask = np.zeros(np.add(imfilter.shape,[2,2]),dtype="uint8")
-        filled = np.copy(imfilter)
+        return imfilter
 
-
-        imfilter = cv2.medianBlur(imfilter,7)
+    def blobSmoothing(self,immask):
+        imfilter = cv2.medianBlur(immask,7)
         imfilter = cv2.medianBlur(imfilter,5)
         imfilter = cv2.medianBlur(imfilter,3)
 
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(5,5))
+
+        imfilter = cv2.dilate(imfilter,kernel)
+        imfilter = cv2.erode(imfilter,kernel)
+        return imfilter
+
+    def getColourContours(self,imbgr):
+        imfilter = self.inRange(imbgr)
+        imfilter = self.blobSmoothing(imfilter)
+
         contours, hierarchy = cv2.findContours(imfilter,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
         return contours
+
+    def getCombinedCentroid(self, imbgr, blue):
+        imfilter = self.inRange(imbgr) + blue.inRange(imbgr)
+        imfilter = self.blobSmoothing(imfilter)
+
+        contours, hierarchy = cv2.findContours(imfilter,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+        start = self.getStartingPoint(imbgr)
+
+        if start:
+            for cnt in contours:
+                if cv2.pointPolygonTest(cnt,start,False) == 1:
+                    break
+            moments = cv2.moments(cnt)
+            if moments['m00'] > 0:
+                return (int(moments['m10']/moments['m00']),int(moments['m01']/moments['m00'])) 
+        return tuple([])
+
+def getCentroidPosition(imbgr,imdepth,startColour,adjacentColour):
+    centroid = startColour.getCombinedCentroid(imbgr, adjacentColour)
+    if centroid:
+        return np.append(centroid,imdepth[centroid[::-1]])
+    return np.array([0,0,0])
 
 def getCentralMoments(hull):
     if len(hull):

@@ -57,7 +57,7 @@ if __name__ == "__main__":
             rightcentroid = extract.getCentroidPosition(imbgr,imdepth,green,blue)
 	    
 	    #begin centroid averaging filter
-	    if len(leftPast) < 10:
+	    if len(leftPast) < 100:
 		lefthand = leftcentroid
 		leftPast.append(leftcentroid)
             else:
@@ -65,7 +65,7 @@ if __name__ == "__main__":
 		leftPast.append(leftcentroid)
 		lefthand = tuple(map(np.mean, zip(*leftPast)))
 
-	    if len(rightPast) < 10:
+	    if len(rightPast) < 100:
 		righthand = rightcentroid
 		rightPast.append(rightcentroid)
             else:
