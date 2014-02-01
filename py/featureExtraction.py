@@ -8,6 +8,28 @@ import frame_convert
 from scipy.misc import factorial as fac
 import cmath
 import math
+import csv
+
+import hashlib
+import functools
+
+class memoize(object):
+    def __init__(self, func):
+       self.func = func
+       self.cache = {}
+       self.oldhash = None
+    def __call__(self, *args):
+        if not len(args) == 2 or not isinstance(args[1],np.ndarray):
+            return self.func(*args)
+        newhash = hashlib.sha1(np.array(args[1]).view(np.uint8)).hexdigest()
+        if not newhash == self.oldhash:
+            self.cache = {}
+            self.oldhash = newhash
+        if args[0] not in self.cache:
+            self.cache[args[0]] = self.func(*args)
+        return self.cache[args[0]]
+    def __get__(self, obj, objtype):
+        return functools.partial(self.__call__, obj)
 
 def get_depth():
     return frame_convert.pretty_depth_cv(freenect.sync_get_depth()[0])
@@ -24,12 +46,13 @@ def toCVMat(im,channels):
                im.dtype.itemsize * channels * im.shape[1])
     return image
 
-class colourFilter:  #need to memoize some of these operations somehow
+class colourFilter: 
 
     def __init__(self,low,high):
         self.low = low
         self.high = high
 
+    @memoize
     def getColourHull(self,imbgr):
         contours = self.getColourContours(imbgr)
         if len(contours):
@@ -49,6 +72,7 @@ class colourFilter:  #need to memoize some of these operations somehow
                 return (int(moments['m10']/moments['m00']),int(moments['m01']/moments['m00'])) 
         return tuple([])
 
+    @memoize
     def inRange(self,imbgr):
         imycrcb = cv2.cvtColor(imbgr,cv.CV_BGR2YCrCb)
         imfilter = cv2.inRange(imycrcb,self.low,self.high)
@@ -65,6 +89,7 @@ class colourFilter:  #need to memoize some of these operations somehow
         imfilter = cv2.erode(imfilter,kernel)
         return imfilter
 
+    @memoize
     def getColourContours(self,imbgr):
         imfilter = self.inRange(imbgr)
         imfilter = self.blobSmoothing(imfilter)
@@ -88,102 +113,47 @@ class colourFilter:  #need to memoize some of these operations somehow
                 return (int(moments['m10']/moments['m00']),int(moments['m01']/moments['m00'])) 
         return tuple([])
 
-def getCentroidPosition(imbgr,imdepth,startColour,adjacentColour):
-    centroid = startColour.getCombinedCentroid(imbgr, adjacentColour)
-    if centroid:
-        return np.append(centroid,imdepth[centroid[::-1]])
-    return np.array([0,0,0])
+class FeatureExtractor:
 
-def getCentralMoments(hull):
-    if len(hull):
-        m = cv2.moments(hull)
-        feature = [m['nu20'],m['nu11'],m['nu02'],m['nu30'],m['nu21'],m['nu12'],m['nu03']]
-    else:
-        feature = [0,0,0,0,0,0,0]
-    return feature
+    def __init__(self,calibration):
+        self.markers = {}
+        with open(calibration) as csvfile:
+            reader = csv.reader(csvfile)
+            low = [ float(x) for x in reader.next()]
+            high = [ float(x) for x in reader.next()]
+            self.markers['right'] = colourFilter(tuple(low),tuple(high))
 
-def getHuMoments(hull):
-    if len(hull):
-        m = cv2.moments(hull)
-        hu = cv2.HuMoments(m)
-        feature = []
-        for i in hu:
-            feature.append(i[0])
-    else:
-        feature = [0,0,0,0,0,0,0]
-    return feature
+            low = [ float(x) for x in reader.next()]
+            high = [ float(x) for x in reader.next()]
+            self.markers['glove'] = colourFilter(tuple(low),tuple(high))
 
-def ZernikeMom(n,l,image,xc,yc,N):
-    N = float(N)
-    n = float(n)
-    l = float(l)
-    xran,yran,_ = image.shape
-    A = complex(0,0)
+            low = [ float(x) for x in reader.next()]
+            high = [ float(x) for x in reader.next()]
+            self.markers['left'] = colourFilter(tuple(low),tuple(high))
 
-    coeff = []
-    for m in range(int((n-l)/2 + 1)):
-        if m%2 == 0:
-            c = 1
+    def getHandPosition(self,imbgr,imdepth,hand):
+        centroid = self.markers[hand].getCombinedCentroid(imbgr, self.markers['glove'])
+        if centroid:
+            return np.append(centroid,imdepth[centroid[::-1]])
+        return np.array([])
+
+    def getCentralMoments(self,imbgr,hand):
+        hull = self.markers[hand].getColourHull(imbgr)
+        if len(hull):
+            m = cv2.moments(hull)
+            feature = [m['nu20'],m['nu11'],m['nu02'],m['nu30'],m['nu21'],m['nu12'],m['nu03']]
         else:
-            c = -1
-        den = (fac(m)*fac((n-2*m-l)/2.)*fac((n-2*m+l)/2.))
-        coeff.append(c*fac(n-m)/den)
+            feature = [0,0,0,0,0,0,0]
+        return feature,hull
 
-    for x in range(xran):
-        xn = (x-xc)/N
-        for y in range(yran):
-            yn = (y-yc)/N
-            zbf = complex(0,0)
-            for m in range(int((n-l)/2 + 1)):
-                rho = xn*xn + yn*yn
-                if rho <= 1:
-                    if xn:
-                        theta = math.atan(yn/xn)
-                    else:
-                        theta = math.pi/2
-                    zbf += coeff[m]* (rho**(n/2-m))*cmath.exp(complex(0,l*theta))
-            A += image[x,y] * zbf.conjugate()
-    return abs(A * (n+1)/np.pi)
-
-def getZernickeMoments(hull,maxorder):
-    xc = 0
-    yc = 0
-    N = 0
-    moments = []
-    if len(hull):
-        leftmost = hull[hull[:,:,0].argmin()][0][0]
-        rightmost = hull[hull[:,:,0].argmax()][0][0]
-        topmost = hull[hull[:,:,1].argmin()][0][1]
-        bottommost = hull[hull[:,:,1].argmax()][0][1]
-
-        M = cv2.moments(hull)
-        xc = int(M['m10']/M['m00']) - leftmost
-        yc = int(M['m01']/M['m00']) - topmost
-
-        N = max(rightmost - leftmost,bottommost - topmost)
-
-        imfilled = np.zeros((rightmost+1,bottommost+1,1))
-        cv2.drawContours(imfilled,[hull],-1,(255,0,0),-1)
-        imfilled = imfilled[leftmost:,topmost:]
-
-    for n in range(maxorder+1):
-        for l in range(n+1):
-            if (n-l)%2 == 0:
-                if N:
-                    moments.append(ZernikeMom(n,l,imfilled,xc,yc,N))
-                    
-                else:
-                    moments.append(0)
-    return moments
-
-def getFeatureVector(hull,featureSet):
-    feature = []
-    if 'central' in featureSet:
-        feature += getCentralMoments(hull)
-    if 'hu' in featureSet:
-        feature += getHuMoments(hull)
-    if 'zernike' in featureSet:
-        feature += getZernickeMoments(hull,3)
-    return feature
-
-
+    def getHuMoments(self,imbgr,hand):
+        hull = self.markers[hand].getColourHull(imbgr)
+        if len(hull):
+            m = cv2.moments(hull)
+            hu = cv2.HuMoments(m)
+            feature = []
+            for i in hu:
+                feature.append(i[0])
+        else:
+            feature = [0,0,0,0,0,0,0]
+        return feature,hull
