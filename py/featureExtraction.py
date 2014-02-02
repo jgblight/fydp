@@ -5,7 +5,6 @@ import cv
 import cv2
 
 import frame_convert
-from scipy.misc import factorial as fac
 import cmath
 import math
 import csv
