@@ -7,6 +7,7 @@ import cv2
 import time
 
 from sklearn import hmm
+import featureExtraction as extract
 
 
 rgb_pattern = re.compile("r-\d+\.\d+-\d+\.ppm")
@@ -49,8 +50,11 @@ class FakenectReader:
             return getTimestamp(rgb_file),imbgr,imdepth
 
 def trainModels(training_folder):
+    #note: may need to set up our own cross-validation scheme
+
 
     labels = []
+    models = {}
     for label in os.listdir(folder):
         label_path = os.path.join(folder,label)
         if os.path.isdir(label_path):
@@ -59,6 +63,12 @@ def trainModels(training_folder):
             for capture in os.listdir(label_path):
                 capture_path = os.path.join(label_path,capture)
                 if os.path.isdir(capture_path):
+                    f = extract.FeatureExtractor(os.path.join(capture_path,"calibration.csv"))
+                    f.setStartPoint()
+                    for timestamp,imbgr,imdepth in FakenectReader(capture_path)
+                        f.addPoint(timestamp,imbgr,imdepth)
+                    training_data = f.getFeatureVector()
+
                     #get feature vector
                     #fit
 
