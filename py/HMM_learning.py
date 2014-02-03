@@ -47,30 +47,31 @@ class FakenectReader:
                 depth_file = self.depth_stack.pop()
             
             imbgr = cv2.imread(os.path.join(self.folder,rgb_file))
-            imdepth = cv2.imread(os.path.join(self.folder,depth_file))
+            imdepth = cv2.imread(os.path.join(self.folder,depth_file))[:,:,0]
             return getTimestamp(rgb_file),imbgr,imdepth
 
-def trainModels(training_folder,):
+def trainModels(training_folder):
     #need to set up some sort of cross-validation
 
     labels = []
     models = {}
 
-    for label in os.listdir(folder):
-        label_path = os.path.join(folder,label)
+    for label in os.listdir(training_folder):
+        label_path = os.path.join(training_folder,label)
         if os.path.isdir(label_path):
             labels.append(label)
+            print label
             models[label] = hmm.GaussianHMM(N) #not sure how to make this a left-right HMM
+            training_data = []
             for capture in os.listdir(label_path):
                 capture_path = os.path.join(label_path,capture)
                 if os.path.isdir(capture_path):
                     f = extract.FeatureExtractor(os.path.join(capture_path,"calibration.csv"))
                     f.setStartPoint()
-                    for timestamp,imbgr,imdepth in FakenectReader(capture_path)
+                    for timestamp,imbgr,imdepth in FakenectReader(capture_path):
                         f.addPoint(timestamp,imbgr,imdepth)
-                    training_data = f.getFeatureVector()
-
-                    models[label].fit(training_data)
+                    training_data.append(np.nan_to_num(f.getFeatures()))
+            models[label].fit(training_data)
                     
 
 
