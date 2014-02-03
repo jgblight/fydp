@@ -10,6 +10,7 @@ from sklearn import hmm
 import featureExtraction as extract
 
 N = 6
+test_percentage = 0.3
 
 rgb_pattern = re.compile("r-\d+\.\d+-\d+\.ppm")
 depth_pattern = re.compile("d-\d+\.\d+-\d+\.pgm")
@@ -61,6 +62,7 @@ def trainModels(training_folder):
         label_path = os.path.join(training_folder,label)
         if os.path.isdir(label_path):
             labels.append(label)
+            test_data[label] = []
             print label
             training_data = []
             for capture in os.listdir(label_path):
@@ -71,8 +73,10 @@ def trainModels(training_folder):
                     for timestamp,imbgr,imdepth in FakenectReader(capture_path):
                         f.addPoint(timestamp,imbgr,imdepth)
 
-
-                    training_data.append(np.nan_to_num(f.getFeatures()))
+                    if np.random.uniform < test_percentage:
+                        test_data[label].append(np.nan_to_num(f.getFeatures()))
+                    else:
+                        training_data.append(np.nan_to_num(f.getFeatures()))
 
             #jiggle hidden state parameter
             n = N
@@ -83,6 +87,25 @@ def trainModels(training_folder):
                     success = True
                 except ValueError:
                     n-=1
+
+    print "testing"
+    all_samples = 0
+    correct = 0
+
+    for label in labels:
+        for sample in test_data[label]:
+            maxlikelihood = 0
+            maxlabel = ""
+            for model_label in labels:
+                likelihood = models[model_label].predict(sample)
+                if likelihood > maxlikelihood:
+                    maxlikelihood = likelihood
+                    maxlabel = model_label
+            all_samples += 1
+            if maxlabel == model_label:
+                correct += 1
+    print correct / float(all_samples)
+
 
 
 if __name__ == "__main__":
