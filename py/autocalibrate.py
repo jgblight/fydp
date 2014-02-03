@@ -19,8 +19,8 @@ if __name__ == "__main__":
 	gHigh = [200, 118, 107]
 	bLow = [50, 90, 165]
 	bHigh = [200, 101, 174]
-	rLow = [50, 168, 109]
-	rHigh = [200, 214, 130]
+	rLow = [50, 170, 107]
+	rHigh = [200, 208, 140]
 
 while 1:
 	try:
@@ -37,8 +37,8 @@ while 1:
 		imgray = cv2.cvtColor(imbgr,cv.CV_BGR2GRAY)
         	imgray2 = cv2.cvtColor(imgray,cv.CV_GRAY2BGR)
 
-		cv2.drawContours(imgray2,greenFingers,-1,(255,0,0),2)
-		cv2.drawContours(imgray2,redFingers,-1,(255,0,0),2)
+		cv2.drawContours(imgray2,greenFingers,-1,(0,255,0),2)
+		cv2.drawContours(imgray2,redFingers,-1,(0,0,255),2)
 	
 		cv2.imshow('Filtered', imgray2)
 
