@@ -11,7 +11,7 @@ from sklearn import hmm
 import featureExtraction as extract
 
 N = 6
-test_percentage = 0.3
+test_percentage = 0.2
 
 rgb_pattern = re.compile("r-\d+\.\d+-\d+\.ppm")
 depth_pattern = re.compile("d-\d+\.\d+-\d+\.pgm")
@@ -78,7 +78,7 @@ def getDataset(training_folder):
 
     return labels,training_data,training_data_paths
 
-def trainModels(labels,training_data,training_data_paths,modelname):
+def evaluateModels(labels,training_data,training_data_paths,modelname):
     models = {}
     test_data = {}
     test_data_paths = {}
@@ -98,7 +98,6 @@ def trainModels(labels,training_data,training_data_paths,modelname):
         n = N
         while not created_model and n > 0:
             try:
-                print n
                 models[label] = hmm.GMMHMM(n,3) #not sure how to make this a left-right HMM
                 models[label].fit(training_set)
                 created_model = True
@@ -107,7 +106,6 @@ def trainModels(labels,training_data,training_data_paths,modelname):
         if not created_model:
             print "MODEL FAILED"
 
-    print "testing"
     all_samples = 0
     correct = 0
 
@@ -120,7 +118,6 @@ def trainModels(labels,training_data,training_data_paths,modelname):
             for j,model_label in enumerate(labels):
                 if models.has_key(model_label):
                     likelihood = models[model_label].score(sample)
-                    print likelihood
                     if likelihood > maxlikelihood:
                         maxlikelihood = likelihood
                         maxlabel = j
@@ -128,7 +125,7 @@ def trainModels(labels,training_data,training_data_paths,modelname):
             if maxlabel == i:
                 correct += 1
             confusion[maxlabel,i] += 1
-    print " "
+    print "Accuracy"
     print correct / float(all_samples)
 
     precision = []
@@ -149,18 +146,19 @@ def trainModels(labels,training_data,training_data_paths,modelname):
     pickle.dump(test_data_paths,pickler)
 
 if __name__ == "__main__":
-    #labels,training_data,training_data_paths = getDataset(sys.argv[1])
+    if len(sys.argv) > 2:
+        labels,training_data,training_data_paths = getDataset(sys.argv[2])
 
-    # persist dataset
-    #pickler = open("dataset.pkl","wb")
-    #pickle.dump(labels,pickler)
-    #pickle.dump(training_data,pickler)
-    #pickle.dump(training_data_paths,pickler)
+        # persist dataset
+        pickler = open("dataset.pkl","wb")
+        pickle.dump(labels,pickler)
+        pickle.dump(training_data,pickler)
+        pickle.dump(training_data_paths,pickler)
+    else:
+        #retrieve dataset
+        modelfile = open("dataset.pkl")
+        labels = pickle.load(modelfile)
+        training_data = pickle.load(modelfile)
+        training_data_paths = pickle.load(modelfile)
 
-    #retrieve dataset
-    modelfile = open("dataset.pkl")
-    labels = pickle.load(modelfile)
-    training_data = pickle.load(modelfile)
-    training_data_paths = pickle.load(modelfile)
-
-    trainModels(labels,training_data,training_data_paths,sys.argv[2])
+    evaluateModels(labels,training_data,training_data_paths,sys.argv[])
