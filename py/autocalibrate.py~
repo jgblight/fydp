@@ -37,8 +37,8 @@ while 1:
 		imgray = cv2.cvtColor(imbgr,cv.CV_BGR2GRAY)
         	imgray2 = cv2.cvtColor(imgray,cv.CV_GRAY2BGR)
 
-		cv2.drawContours(imgray2,greenFingers,-1,(0,0,255),2)
-		cv2.drawContours(imgray2,redFingers,-1,(0,255,0),2)
+		cv2.drawContours(imgray2,greenFingers,-1,(0,255,0),2)
+		cv2.drawContours(imgray2,redFingers,-1,(0,0,255),2)
 	
 		cv2.imshow('Filtered', imgray2)
 
