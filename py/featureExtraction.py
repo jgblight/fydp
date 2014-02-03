@@ -11,6 +11,9 @@ import csv
 
 import hashlib
 import functools
+import scipy.stats as stats
+
+smoothing_memory = 10
 
 class memoize(object):
     def __init__(self, func):
@@ -129,12 +132,15 @@ class FeatureExtractor:
             low = [ float(x) for x in reader.next()]
             high = [ float(x) for x in reader.next()]
             self.markers['left'] = colourFilter(tuple(low),tuple(high))
+        self.features = np.array([])
+        self.memory = np.array([])
+        self.timeline = np.array([])
 
     def getHandPosition(self,imbgr,imdepth,hand):
         centroid = self.markers[hand].getCombinedCentroid(imbgr, self.markers['glove'])
         if centroid:
             return np.append(centroid,imdepth[centroid[::-1]])
-        return np.array([])
+        return np.array([np.nan,np.nan,np.nan])
 
     def getCentralMoments(self,imbgr,hand):
         hull = self.markers[hand].getColourHull(imbgr)
@@ -156,3 +162,44 @@ class FeatureExtractor:
         else:
             feature = [0,0,0,0,0,0,0]
         return feature,hull
+
+    def setStartPoint(self):
+        self.features = np.array([])
+        self.memory = np.array([])
+        self.timeline = np.array([])
+
+    #may eventually want some interface to specify which features to include
+    def rawFeatureVector(self,imbgr,imdepth):
+        v = np.array([])
+        leftmoments,_ = self.getCentralMoments(imbgr,'left')
+        rightmoments,_ = self.getCentralMoments(imbgr,'right')
+        v = np.append(v,leftmoments)
+        v = np.append(v,rightmoments)
+        v = np.append(v,self.getHandPosition(imbgr,imdepth,'left'))
+        v = np.append(v,self.getHandPosition(imbgr,imdepth,'right'))
+        return v
+
+    #keeping a memory of "smoothing_memory" frames for now
+    # may attempt different types of smoothing in the future (eg. Kalman filter)
+    def addPoint(self,timestamp,imbgr,imdepth):
+        self.timeline = np.append(self.timeline,timestamp)
+        v = self.rawFeatureVector(imbgr,imdepth)
+        if self.memory.shape != (0,):
+            self.memory = np.vstack((self.memory,v))
+        else:
+            self.memory = v[np.newaxis]
+        if self.memory.shape[0] > smoothing_memory:
+            self.memory = self.memory[-smoothing_memory:]
+
+        #indexing here? (smooth only some features)
+        smoothed = stats.nanmean(self.memory)
+
+        if self.features.shape != (0,):
+            self.features = np.vstack((self.features,smoothed))
+        else:
+            self.features = smoothed
+        return smoothed
+
+    def getFeatures(self):
+        print self.features.shape
+        return self.features

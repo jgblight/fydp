@@ -9,6 +9,7 @@ import time
 from sklearn import hmm
 import featureExtraction as extract
 
+N = 5
 
 rgb_pattern = re.compile("r-\d+\.\d+-\d+\.ppm")
 depth_pattern = re.compile("d-\d+\.\d+-\d+\.pgm")
@@ -49,17 +50,17 @@ class FakenectReader:
             imdepth = cv2.imread(os.path.join(self.folder,depth_file))
             return getTimestamp(rgb_file),imbgr,imdepth
 
-def trainModels(training_folder):
-    #note: may need to set up our own cross-validation scheme
-
+def trainModels(training_folder,):
+    #need to set up some sort of cross-validation
 
     labels = []
     models = {}
+
     for label in os.listdir(folder):
         label_path = os.path.join(folder,label)
         if os.path.isdir(label_path):
             labels.append(label)
-            #create HMM model
+            models[label] = hmm.GaussianHMM(N) #not sure how to make this a left-right HMM
             for capture in os.listdir(label_path):
                 capture_path = os.path.join(label_path,capture)
                 if os.path.isdir(capture_path):
@@ -69,8 +70,8 @@ def trainModels(training_folder):
                         f.addPoint(timestamp,imbgr,imdepth)
                     training_data = f.getFeatureVector()
 
-                    #get feature vector
-                    #fit
+                    models[label].fit(training_data)
+                    
 
 
 if __name__ == "__main__":
