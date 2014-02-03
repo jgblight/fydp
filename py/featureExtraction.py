@@ -201,5 +201,4 @@ class FeatureExtractor:
         return smoothed
 
     def getFeatures(self):
-        print self.features.shape
         return self.features
