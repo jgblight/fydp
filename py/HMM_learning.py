@@ -9,7 +9,7 @@ import time
 from sklearn import hmm
 import featureExtraction as extract
 
-N = 5
+N = 6
 
 rgb_pattern = re.compile("r-\d+\.\d+-\d+\.ppm")
 depth_pattern = re.compile("d-\d+\.\d+-\d+\.pgm")
@@ -52,16 +52,16 @@ class FakenectReader:
 
 def trainModels(training_folder):
     #need to set up some sort of cross-validation
-
+    success = False
     labels = []
     models = {}
+    test_data = {}
 
     for label in os.listdir(training_folder):
         label_path = os.path.join(training_folder,label)
         if os.path.isdir(label_path):
             labels.append(label)
             print label
-            models[label] = hmm.GaussianHMM(N) #not sure how to make this a left-right HMM
             training_data = []
             for capture in os.listdir(label_path):
                 capture_path = os.path.join(label_path,capture)
@@ -70,9 +70,19 @@ def trainModels(training_folder):
                     f.setStartPoint()
                     for timestamp,imbgr,imdepth in FakenectReader(capture_path):
                         f.addPoint(timestamp,imbgr,imdepth)
+
+
                     training_data.append(np.nan_to_num(f.getFeatures()))
-            models[label].fit(training_data)
-                    
+
+            #jiggle hidden state parameter
+            n = N
+            while not success:
+                try:
+                    models[label] = hmm.GaussianHMM(n) #not sure how to make this a left-right HMM
+                    models[label].fit(training_data)
+                    success = True
+                except ValueError:
+                    n-=1
 
 
 if __name__ == "__main__":
