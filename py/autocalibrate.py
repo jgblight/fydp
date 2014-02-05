@@ -60,6 +60,12 @@ while 1:
 
 			elif gfingerTrackList.count(5) == 5:
 				greencalibrated = True
+				with open(os.path.join(recordpath,'autocalibration.csv'),'w') as csvfile:
+       		 			writer = csv.writer(csvfile)
+					writer.writerow(gLow)
+					writer.writerow(gHigh)
+					writer.writerow(rLow)
+					writer.writerow(rHigh)
 
 		if redcalibrated == False and len(redFingers) != 0:
 			if len(rfingerTrackList) < 5:
@@ -80,9 +86,9 @@ while 1:
 			elif rfingerTrackList.count(5) == 5:
 				redcalibrated = True
 		
-				
 
 		print "green: " + str(len(greenFingers)) + " red: " + str(len(redFingers))
+
 
 	except KeyboardInterrupt:
             break
