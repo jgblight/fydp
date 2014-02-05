@@ -45,7 +45,7 @@ class Sampler:
         print (ymean,crmean,cbmean)
         print (ystd,crstd,cbstd)
 
-        self.filter = fe.colourFilter((50,crmean-crstd*delta,cbmean-cbstd*delta),(200,crmean+crstd*delta,cbmean+cbstd*delta))
+        self.filter = fe.colourFilter((ymean-ystd*2*delta,crmean-crstd*delta,cbmean-cbstd*delta),(ymean+ystd*2*delta,crmean+crstd*delta,cbmean+cbstd*delta))
         hull = self.filter.getColourHull(self.img)
         print self.filter.low
         print self.filter.high
