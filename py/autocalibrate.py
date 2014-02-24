@@ -28,7 +28,7 @@ while 1:
 		blue = fe.colourFilter(tuple(bLow),tuple(bHigh))
 		red = fe.colourFilter(tuple(rLow),tuple(rHigh))
 
-		imbgr = fe.get_video()
+		imbgr = fe.get_video()    imbgr = cv2.imread(ppmpath)
         	imdepth = fe.get_depth()
 
 		greenFingers = green.getColourContours(imbgr)
@@ -77,7 +77,7 @@ while 1:
 			if rfingerTrackList.count(5) != len(rfingerTrackList):
 		
 		
-				if len(greenFingers) != 5:
+				if len(redFingers) != 5:
 					rLow[1] = rLow[1] -1
 					rLow[2] = rLow[2] - 1
 					rHigh[1] = rHigh[1] + 1
