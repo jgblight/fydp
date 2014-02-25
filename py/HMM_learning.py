@@ -75,8 +75,9 @@ def getDataset(training_folder):
                         f.addPoint(timestamp,imbgr,imdepth)
 
                     feature = f.getFeatures()
-                    dataset_X.append(np.nan_to_num(feature))
-                    dataset_Y.append(label_index)
+                    if feature.size:
+                        dataset_X.append(np.nan_to_num(feature))
+                        dataset_Y.append(label_index)
 
     return labels,dataset_X,dataset_Y
 

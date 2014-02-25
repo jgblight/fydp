@@ -207,5 +207,5 @@ class FeatureExtractor:
             self.features[:,indices] = (self.features[:,indices] - nanmin)/(nanmax-nanmin)
 
     def getFeatures(self):
-        #self.normalize([14,15,16,17,18,19])
+        self.normalize([14,15,16,17,18,19])
         return self.features
