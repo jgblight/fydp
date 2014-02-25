@@ -12,7 +12,7 @@ from sklearn import hmm
 import featureExtraction as extract
 from sklearn.cross_validation import StratifiedKFold
 
-N = 6
+
 folds = 5
 
 rgb_pattern = re.compile("r-\d+\.\d+-\d+\.ppm")
@@ -74,7 +74,8 @@ def getDataset(training_folder):
                     for timestamp,imbgr,imdepth in FakenectReader(capture_path):
                         f.addPoint(timestamp,imbgr,imdepth)
 
-                    dataset_X.append(np.nan_to_num(f.getFeatures()))
+                    feature = f.getFeatures()
+                    dataset_X.append(np.nan_to_num(feature))
                     dataset_Y.append(label_index)
 
     return labels,dataset_X,dataset_Y
@@ -102,11 +103,14 @@ def trainModels(train_X,train_Y):
 def predict(models,obs):
     likelihoods = []
     for model in models:
-        likelihoods.append(model.score(obs))
+        if model:
+            likelihoods.append(model.score(obs))
+        else:
+            likelihoods.append(0)
 
     return np.argmax(likelihoods)
 
-def evaluateModels(labels,dataset_X,dataset_Y,modelname):
+def evaluateModels(labels,dataset_X,dataset_Y,modelname,N):
     #jiggle hidden state parameter
 
     confusion = np.zeros([len(labels),len(labels)])
@@ -177,4 +181,6 @@ if __name__ == "__main__":
         dataset_X = pickle.load(modelfile)
         dataset_Y = pickle.load(modelfile)
 
-    evaluateModels(labels,dataset_X,dataset_Y,sys.argv[1])
+    for N in range(3,11):
+        print "N = " + str(N)
+        evaluateModels(labels,dataset_X,dataset_Y,sys.argv[1],N)

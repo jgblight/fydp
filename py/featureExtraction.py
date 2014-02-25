@@ -171,12 +171,12 @@ class FeatureExtractor:
     #may eventually want some interface to specify which features to include
     def rawFeatureVector(self,imbgr,imdepth):
         v = np.array([])
-        leftmoments,_ = self.getCentralMoments(imbgr,'left')
-        rightmoments,_ = self.getCentralMoments(imbgr,'right')
+        leftmoments,_ = self.getCentralMoments(imbgr,'left') #0-6
+        rightmoments,_ = self.getCentralMoments(imbgr,'right') #7-13
         v = np.append(v,leftmoments)
         v = np.append(v,rightmoments)
-        v = np.append(v,self.getHandPosition(imbgr,imdepth,'left'))
-        v = np.append(v,self.getHandPosition(imbgr,imdepth,'right'))
+        v = np.append(v,self.getHandPosition(imbgr,imdepth,'left')) #14-16
+        v = np.append(v,self.getHandPosition(imbgr,imdepth,'right')) #17-19
         return v
 
     #keeping a memory of "smoothing_memory" frames for now
@@ -200,5 +200,12 @@ class FeatureExtractor:
             self.features = smoothed
         return smoothed
 
+    def normalize(self,indices):
+        if self.features.size:
+            nanmin = np.nanmin(self.features[:,indices],0)
+            nanmax = np.nanmax(self.features[:,indices],0)
+            self.features[:,indices] = (self.features[:,indices] - nanmin)/(nanmax-nanmin)
+
     def getFeatures(self):
+        #self.normalize([14,15,16,17,18,19])
         return self.features
