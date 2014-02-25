@@ -99,7 +99,7 @@ if __name__ == "__main__":
 
     with open(modelname+'.csv','w') as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(['Cross-Validated Accuracy',gridclf.best_score_])
+        writer.writerow(['Accuracy',gridclf.best_score_])
         writer.writerow(['Precision']+ precision)
         writer.writerow(['Recall']+recall)
 

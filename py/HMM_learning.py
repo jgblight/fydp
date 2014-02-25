@@ -6,12 +6,14 @@ import re
 import cv2
 import time
 import pickle
+import csv
 
 from sklearn import hmm
 import featureExtraction as extract
+from sklearn.cross_validation import StratifiedKFold
 
 N = 6
-test_percentage = 0.2
+folds = 5
 
 rgb_pattern = re.compile("r-\d+\.\d+-\d+\.ppm")
 depth_pattern = re.compile("d-\d+\.\d+-\d+\.pgm")
@@ -55,15 +57,14 @@ class FakenectReader:
 def getDataset(training_folder):
     #need to set up some sort of cross-validation
     labels = []
-    training_data = {}
-    training_data_paths = {}
+    dataset_X = []
+    dataset_Y = []
 
     for label in os.listdir(training_folder):
         label_path = os.path.join(training_folder,label)
         if os.path.isdir(label_path):
             labels.append(label)
-            training_data[label] = []
-            training_data_paths[label] = []
+            label_index = len(labels) - 1
             print label
             for capture in os.listdir(label_path):
                 capture_path = os.path.join(label_path,capture)
@@ -73,58 +74,62 @@ def getDataset(training_folder):
                     for timestamp,imbgr,imdepth in FakenectReader(capture_path):
                         f.addPoint(timestamp,imbgr,imdepth)
 
-                    training_data[label].append(np.nan_to_num(f.getFeatures()))
-                    training_data_paths[label].append(capture_path)
+                    dataset_X.append(np.nan_to_num(f.getFeatures()))
+                    dataset_Y.append(label_index)
 
-    return labels,training_data,training_data_paths
+    return labels,dataset_X,dataset_Y
 
-def evaluateModels(labels,training_data,training_data_paths,modelname):
-    models = {}
-    test_data = {}
-    test_data_paths = {}
-    #jiggle hidden state parameter
-    for label in labels:
-        training_set = []
-        test_data[label] = []
-        test_data_paths[label] = []
-        for capture,capture_path in zip(training_data[label],training_data_paths[label]):
-            if np.random.uniform() > test_percentage:
-                training_set.append(capture)
-            else:
-                test_data[label].append(capture)
-                test_data_paths[label].append(capture_path) 
+def trainModels(train_X,train_Y):
+    models = []
+    for i,label in enumerate(labels):
+        training_set = [x for x,y in zip(train_X,train_Y) if (y==i)]
 
         created_model = False
         n = N
         while not created_model and n > 0:
             try:
-                models[label] = hmm.GMMHMM(n,3) #not sure how to make this a left-right HMM
-                models[label].fit(training_set)
+                model = hmm.GMMHMM(n,3) #not sure how to make this a left-right HMM
+                model.fit(training_set)
                 created_model = True
             except ValueError:
                 n-=1
         if not created_model:
             print "MODEL FAILED"
+            model = None
+        models.append(model)
+    return models
 
-    all_samples = 0
-    correct = 0
+def predict(models,obs):
+    likelihoods = []
+    for model in models:
+        likelihoods.append(model.score(obs))
+
+    return np.argmax(likelihoods)
+
+def evaluateModels(labels,dataset_X,dataset_Y,modelname):
+    #jiggle hidden state parameter
 
     confusion = np.zeros([len(labels),len(labels)])
 
-    for i,label in enumerate(labels):
-        for sample in test_data[label]:
-            maxlikelihood = -100000
-            maxlabel = ""
-            for j,model_label in enumerate(labels):
-                if models.has_key(model_label):
-                    likelihood = models[model_label].score(sample)
-                    if likelihood > maxlikelihood:
-                        maxlikelihood = likelihood
-                        maxlabel = j
-            all_samples += 1
-            if maxlabel == i:
+    skf = StratifiedKFold(dataset_Y, folds)
+    all_samples = 0
+    correct = 0
+
+    for train,test in skf:
+        train_X = [ dataset_X[i] for i in train ]
+        train_Y = [ dataset_Y[i] for i in train ]
+        test_X = [ dataset_X[i] for i in test ]
+        test_Y = [ dataset_Y[i] for i in test ]
+
+        models = trainModels(train_X,train_Y)
+
+        for x,y in zip(test_X,test_Y):
+            prediction = predict(models,x)
+            confusion[prediction,y] += 1
+            if prediction == y:
                 correct += 1
-            confusion[maxlabel,i] += 1
+            all_samples += 1
+    
     print "Accuracy"
     print correct / float(all_samples)
 
@@ -138,27 +143,38 @@ def evaluateModels(labels,training_data,training_data_paths,modelname):
     print "Precision: " + str(precision)
     print "Recall: " + str(recall)
 
+    print confusion
+
     # persist model
     pickler = open(modelname+".pkl","wb")
     pickle.dump(labels,pickler)
     pickle.dump(models,pickler)
-    pickle.dump(test_data,pickler)
-    pickle.dump(test_data_paths,pickler)
+
+    with open(modelname+'.csv','w') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(['Accuracy',correct / float(all_samples)])
+        writer.writerow(['Precision']+ precision)
+        writer.writerow(['Recall']+recall)
+
+        writer.writerow(['Confusion Matrix'])
+        writer.writerow(labels)
+        for row in confusion:
+            writer.writerow(row)
 
 if __name__ == "__main__":
     if len(sys.argv) > 2:
-        labels,training_data,training_data_paths = getDataset(sys.argv[2])
+        labels,dataset_X,dataset_Y = getDataset(sys.argv[2])
 
         # persist dataset
         pickler = open("dataset.pkl","wb")
         pickle.dump(labels,pickler)
-        pickle.dump(training_data,pickler)
-        pickle.dump(training_data_paths,pickler)
+        pickle.dump(dataset_X,pickler)
+        pickle.dump(dataset_Y,pickler)
     else:
         #retrieve dataset
         modelfile = open("dataset.pkl")
         labels = pickle.load(modelfile)
-        training_data = pickle.load(modelfile)
-        training_data_paths = pickle.load(modelfile)
+        dataset_X = pickle.load(modelfile)
+        dataset_Y = pickle.load(modelfile)
 
-    evaluateModels(labels,training_data,training_data_paths,sys.argv[])
+    evaluateModels(labels,dataset_X,dataset_Y,sys.argv[1])
