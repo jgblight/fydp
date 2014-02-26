@@ -13,7 +13,7 @@ import featureExtraction as extract
 from sklearn.cross_validation import StratifiedKFold
 from sklearn.cluster import KMeans
 
-K = 10
+K = 30
 folds = 5
 
 rgb_pattern = re.compile("r-\d+\.\d+-\d+\.ppm")
@@ -58,27 +58,24 @@ class FakenectReader:
 class Clusters:
     def __init__(self, K):
         self.K = K
-        self.estimators = []
+        self.estimator = KMeans(init="k-means++",n_clusters=self.K)
         self.n_features = 0
 
     #not sure if there's a way to vectorize this more
     def train(self,dataset):
         self.n_features = dataset[0].shape[1]
-        self.estimators = []
-        for i in range(self.n_features):
-            kmeans = KMeans(init="k-means++",n_clusters=self.K)
-            all_samples = np.array([])
-            for sample in dataset:
-                all_samples = np.concatenate([all_samples,sample[:,i]])    
-            kmeans.fit(np.transpose(all_samples[np.newaxis])) 
-            self.estimators.append(kmeans)
+        all_samples = np.array([])
+        for sample in dataset:
+            if all_samples.size:
+                all_samples = np.vstack([all_samples,sample]) 
+            else:
+                all_samples = sample
+        self.estimator.fit(all_samples) 
         
 
     def classify(self,sample):
-        clustered = np.zeros(sample.shape)
-        for i in range(self.n_features):
-            clustered[:,i] = self.estimators[i].predict(np.transpose(sample[:,i][np.newaxis]))
-        return clustered
+        clustered = self.estimator.predict(sample)[np.newaxis]
+        return np.transpose(clustered)
 
     def classify_set(self,samples):
         clustered = []
@@ -123,7 +120,7 @@ def trainModels(train_X,train_Y,N):
         n = N
         while not created_model and n > 0:
             try:
-                model = hmm.MultinomialHMM(n) #not sure how to make this a left-right HMM
+                model = hmm.GMMHMM(n,3) #not sure how to make this a left-right HMM
                 model.fit(training_set)
                 created_model = True
             except ValueError:
@@ -164,7 +161,8 @@ def evaluateModels(labels,dataset_X,dataset_Y,modelname,N):
         train_X = clusters.classify_set(train_X)
         test_X = clusters.classify_set(test_X)
 
-        print train_X
+        print train_X[0].shape
+
         models = trainModels(train_X,train_Y,N)
 
         for x,y in zip(test_X,test_Y):
