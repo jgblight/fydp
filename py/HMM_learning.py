@@ -180,11 +180,6 @@ def evaluateModels(labels,dataset_X,dataset_Y,modelname,N):
 
     print confusion
 
-    # persist model
-    pickler = open(modelname+".pkl","wb")
-    pickle.dump(labels,pickler)
-    pickle.dump(models,pickler)
-
     with open(modelname+'.csv','w') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(['Accuracy',correct / float(all_samples)])
@@ -195,6 +190,15 @@ def evaluateModels(labels,dataset_X,dataset_Y,modelname,N):
         writer.writerow(labels)
         for row in confusion:
             writer.writerow(row)
+
+    return correct / float(all_samples)
+
+def createModel(labels,dataset_X,dataset_Y,modelname,N):
+    models = trainModels(dataset_X,dataset_Y,N)
+    # persist model
+    pickler = open(modelname+".pkl","wb")
+    pickle.dump(labels,pickler)
+    pickle.dump(models,pickler)
 
 if __name__ == "__main__":
     if len(sys.argv) > 2:
@@ -212,6 +216,16 @@ if __name__ == "__main__":
         dataset_X = pickle.load(modelfile)
         dataset_Y = pickle.load(modelfile)
 
+
+    max_accuracy = 0
+    best_N = 0
     for N in range(3,11):
         print "N = " + str(N)
-        evaluateModels(labels,dataset_X,dataset_Y,sys.argv[1],N)
+        accuracy = evaluateModels(labels,dataset_X,dataset_Y,sys.argv[1],N)
+        if accuracy > max_accuracy:
+            best_N = N
+            max_accuracy = accuracy
+
+    createModel(labels,dataset_X,dataset_Y,sys.argv[1],best_N)
+
+
