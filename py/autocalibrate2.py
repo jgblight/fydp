@@ -61,8 +61,8 @@ def callback(sampler, pt1, pt2):
         if event == cv2.EVENT_LBUTTONDOWN:
             if not sampler.gotRoi:
                 sampler.pt1 = pt1
-		sampler.pt2 = pt2
-		sampler.applyFilter()
+                sampler.pt2 = pt2
+                sampler.applyFilter()
                 sampler.gotRoi = True
 
     return onmouse
@@ -73,25 +73,26 @@ def getColourRange(writer,colour, pt1, pt2,regioncolour):
 
     while 1: 
         try:
-		imbgr = fe.get_video()   
-        	imdepth = fe.get_depth()
-		
-		sampler = Sampler(imbgr)
+            imbgr = np.array(fe.get_video())   
+        
+            sampler = Sampler(imbgr)
 
-		imgray = cv2.cvtColor(imbgr,cv.CV_BGR2GRAY)
-		imgray2 = cv2.cvtColor(imgray,cv.CV_GRAY2BGR)
-	
-		cv2.rectangle(imgray2, pt1, pt2, regioncolour, 2)
+            #imgray = cv2.cvtColor(imbgr,cv.CV_BGR2GRAY)
+            #imgray2 = cv2.cvtColor(imgray,cv.CV_GRAY2BGR)
+    
+            cv2.rectangle(imbgr, pt1, pt2, regioncolour, 2)
 
-		sampler = Sampler(imbgr)
-    		
-    		cv2.namedWindow(windowname,1)
-    		cv2.setMouseCallback(windowname, callback(sampler, pt1, pt2))
-		cv2.imshow(windowname, imgray2) 
-		if cv.WaitKey(10) == 27:
-           		break
+            sampler = Sampler(imbgr)
+            
+            cv2.namedWindow(windowname,1)
+            cv2.setMouseCallback(windowname, callback(sampler, pt1, pt2))
+            cv2.imshow(windowname, imbgr)
+            if sampler.gotRoi:
+                break 
+            if cv.WaitKey(10) == 27:
+                    break
 
-	except KeyboardInterrupt:
+        except KeyboardInterrupt:
             break
        
     cv2.destroywindow(windowname)
@@ -102,13 +103,13 @@ def calibrate(recordpath):
 
     with open(os.path.join(recordpath,'calibration.csv'),'w') as csvfile:
         writer = csv.writer(csvfile)
-	print "Blue: "
+        print "Blue: "
         getColourRange(writer,"Blue", (200,300),(250,350), (255,0,0))
-	print "Green: "
-	getColourRange(writer,"Green", (200,300),(250,350), (0,255,0))
+        print "Green: "
+        getColourRange(writer,"Green", (200,300),(250,350), (0,255,0))
 
 
 if __name__ == "__main__":
-	calibrate(sys.argv[1])
+    calibrate(sys.argv[1])
 
 
