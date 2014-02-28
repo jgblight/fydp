@@ -156,13 +156,6 @@ def evaluateModels(labels,dataset_X,dataset_Y,modelname,N):
         test_X = [ dataset_X[i] for i in test ]
         test_Y = [ dataset_Y[i] for i in test ]
 
-        clusters = Clusters(K)
-        clusters.train(train_X)
-        train_X = clusters.classify_set(train_X)
-        test_X = clusters.classify_set(test_X)
-
-        print train_X[0].shape
-
         models = trainModels(train_X,train_Y,N)
 
         for x,y in zip(test_X,test_Y):
