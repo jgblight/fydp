@@ -32,13 +32,10 @@ def getFeatures(folder):
         if os.path.splitext(f)[1] == ".ppm":
             imbgr = cv2.imread(os.path.join(folder,f))
             hull = green.getColourHull(imbgr)
-<<<<<<< HEAD
-            features.append(fe.getFeatureVector(hull,['zernike']))
-=======
+
             features.append(fe.getFeatureVector(hull,['central']))
             hull = blue.getColourHull(imbgr)
             features.append(fe.getFeatureVector(hull,['central']))
->>>>>>> blue
     return features
    
 
@@ -102,7 +99,7 @@ if __name__ == "__main__":
 
     with open(modelname+'.csv','w') as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(['Cross-Validated Accuracy',gridclf.best_score_])
+        writer.writerow(['Accuracy',gridclf.best_score_])
         writer.writerow(['Precision']+ precision)
         writer.writerow(['Recall']+recall)
 
