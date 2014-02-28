@@ -28,7 +28,7 @@ while 1:
 		blue = fe.colourFilter(tuple(bLow),tuple(bHigh))
 		red = fe.colourFilter(tuple(rLow),tuple(rHigh))
 
-		imbgr = fe.get_video()    imbgr = cv2.imread(ppmpath)
+		imbgr = fe.get_video()    
         	imdepth = fe.get_depth()
 
 		greenFingers = green.getColourContours(imbgr)

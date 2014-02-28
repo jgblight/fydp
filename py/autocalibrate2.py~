@@ -1,5 +1,6 @@
-import featureExtraction as fe
 import numpy as np 
+import featureExtraction as fe
+from collections import deque
 import freenect
 import os
 import sys
@@ -54,59 +55,60 @@ class Sampler:
         cv2.drawContours(imgray,[hull],-1,(255,0,0),2)
         self.displayImage = imgray
 
-
-
-def callback(sampler):
+def callback(sampler, pt1, pt2):
 
     def onmouse(event, x, y, flags, param):
         if event == cv2.EVENT_LBUTTONDOWN:
             if not sampler.gotRoi:
-                sampler.pt1 = (y,x)
-        elif event == cv2.EVENT_LBUTTONUP:
-            if not sampler.gotRoi and sampler.pt1 is not None:
-                sampler.pt2 = (y,x)
-                sampler.applyFilter()
+                sampler.pt1 = pt1
+		sampler.pt2 = pt2
+		sampler.applyFilter()
                 sampler.gotRoi = True
-        elif event == cv2.EVENT_RBUTTONDOWN:
-            if sampler.gotRoi:
-                pt1 = None
-                pt2 = None
-                sampler.gotRoi = False
-                sampler.displayImage = sampler.img
 
     return onmouse
 
-def getColourRange(imbgr,writer,colour):
-    sampler = Sampler(imbgr)
+def getColourRange(writer,colour, pt1, pt2,regioncolour):
+    
     windowname = "Select " + colour
 
-    cv2.namedWindow(windowname,1)
-    cv2.setMouseCallback(windowname, callback(sampler))
-
     while 1: 
-        cv2.imshow(windowname,sampler.displayImage)
-        if cv.WaitKey(10) == 27:
-            break
+       # try:
+		imbgr = fe.get_video()   
+        	imdepth = fe.get_depth()
+		
+		sampler = Sampler(imbgr)
 
+		imgray = cv2.cvtColor(imbgr,cv.CV_BGR2GRAY)
+		imgray2 = cv2.cvtColor(imgray,cv.CV_GRAY2BGR)
+	
+		cv2.rectangle(imgray2, pt1, pt2, regioncolour, 2)
+
+		sampler = Sampler(imbgr)
+    		
+    		cv2.namedWindow(windowname,1)
+    		cv2.setMouseCallback(windowname, callback(sampler, pt1, pt2))
+		cv2.imshow(windowname, imgray2) 
+		if cv.WaitKey(10) == 27:
+           		break
+
+	#except KeyboardInterrupt:
+        #    break
+       
+    cv2.destroywindow(windowname)
     writer.writerow(sampler.filter.low)
     writer.writerow(sampler.filter.high)
 
 def calibrate(recordpath):
-    for filename in os.listdir(recordpath):
-        if os.path.splitext(filename)[1] == ".ppm":
-            ppmpath = os.path.join(recordpath,filename)
-            break
-
-    imbgr = cv2.imread(ppmpath)
-
 
     with open(os.path.join(recordpath,'calibration.csv'),'w') as csvfile:
         writer = csv.writer(csvfile)
-        getColourRange(imbgr,writer,"Green")
-        getColourRange(imbgr,writer,"Blue")
-        getColourRange(imbgr,writer,"Red")
-
+	print "Blue: "
+        getColourRange(writer,"Blue", (200,300),(250,350), (255,0,0))
+	print "Green: "
+	getColourRange(writer,"Green", (200,300),(250,350), (0,255,0))
 
 
 if __name__ == "__main__":
-    calibrate(sys.argv[1])
+	calibrate(sys.argv[1])
+
+
