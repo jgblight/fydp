@@ -83,6 +83,43 @@ class Clusters:
             clustered.append(self.classify(sample))
         return clustered
 
+class SignModel:
+    def __init__(self,labels):
+        self.labels = labels
+        self.models = []
+
+    def get_labels(self):
+        return self.labels
+
+    def train(self,train_X,train_Y,N):
+        self.models = []
+        for i,label in enumerate(labels):
+            training_set = [x for x,y in zip(train_X,train_Y) if (y==i)]
+
+            created_model = False
+            n = N
+            while not created_model and n > 0:
+                try:
+                    model = hmm.GMMHMM(n,3) #not sure how to make this a left-right HMM
+                    model.fit(training_set)
+                    created_model = True
+                except ValueError:
+                    n-=1
+            if not created_model:
+                print "MODEL FAILED"
+                model = None
+            self.models.append(model)
+
+
+    def predict(self,obs):
+        likelihoods = []
+        for model in self.models:
+            if model:
+                likelihoods.append(model.score(obs))
+            else:
+                likelihoods.append(0)
+
+        return np.argmax(likelihoods)
 
 def getDataset(training_folder):
     #need to set up some sort of cross-validation
@@ -111,36 +148,6 @@ def getDataset(training_folder):
 
     return labels,dataset_X,dataset_Y
 
-def trainModels(train_X,train_Y,N):
-    models = []
-    for i,label in enumerate(labels):
-        training_set = [x for x,y in zip(train_X,train_Y) if (y==i)]
-
-        created_model = False
-        n = N
-        while not created_model and n > 0:
-            try:
-                model = hmm.GMMHMM(n,3) #not sure how to make this a left-right HMM
-                model.fit(training_set)
-                created_model = True
-            except ValueError:
-                n-=1
-        if not created_model:
-            print "MODEL FAILED"
-            model = None
-        models.append(model)
-    return models
-
-def predict(models,obs):
-    likelihoods = []
-    for model in models:
-        if model:
-            likelihoods.append(model.score(obs))
-        else:
-            likelihoods.append(0)
-
-    return np.argmax(likelihoods)
-
 def evaluateModels(labels,dataset_X,dataset_Y,modelname,N):
     #jiggle hidden state parameter
 
@@ -156,10 +163,11 @@ def evaluateModels(labels,dataset_X,dataset_Y,modelname,N):
         test_X = [ dataset_X[i] for i in test ]
         test_Y = [ dataset_Y[i] for i in test ]
 
-        models = trainModels(train_X,train_Y,N)
+        model = SignModel(labels)
+        model.train(train_X,train_Y,N)
 
         for x,y in zip(test_X,test_Y):
-            prediction = predict(models,x)
+            prediction = model.predict(x)
             confusion[prediction,y] += 1
             if prediction == y:
                 correct += 1
@@ -194,11 +202,11 @@ def evaluateModels(labels,dataset_X,dataset_Y,modelname,N):
     return correct / float(all_samples)
 
 def createModel(labels,dataset_X,dataset_Y,modelname,N):
-    models = trainModels(dataset_X,dataset_Y,N)
+    model = SignModel(labels)
+    model.train(train_X,train_Y,N)
     # persist model
     pickler = open(modelname+".pkl","wb")
-    pickle.dump(labels,pickler)
-    pickle.dump(models,pickler)
+    pickle.dump(model,pickler)
 
 if __name__ == "__main__":
     if len(sys.argv) > 2:

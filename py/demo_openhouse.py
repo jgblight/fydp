@@ -65,11 +65,11 @@ if __name__ == "__main__":
         likelihood = scores[rand_sign]
         print likelihood
 
-        if likelihood < 0.3 or likelihood == np.nan:
+        if likelihood < 0.6 or likelihood == np.nan:
             message = "Try Again!"
-        elif likelihood < 0.5:
-            message = "Weak"
         elif likelihood < 0.8:
+            message = "Weak"
+        elif likelihood < 0.95:
             message = "Good Job"
         else:
             message = "Excellent!"
