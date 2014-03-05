@@ -104,7 +104,7 @@ class SignModel:
 
             model = hmm.MultinomialHMM(N)
             discrete_obs = self.clusters.classify_set(training_set)
-            model = model.train(discrete_obs)
+            model = model.fit(discrete_obs)
 
             self.models.append(model)
 
