@@ -7,11 +7,15 @@ import cv2
 import time
 import pickle
 import csv
+import random
 
 from sklearn import hmm
 import featureExtraction as extract
 from sklearn.cross_validation import StratifiedKFold
 from sklearn.cluster import KMeans
+
+from hmm.continuous.GMHMM import GMHMM
+from hmm.discrete.DiscreteHMM import DiscreteHMM
 
 K = 30
 folds = 5
@@ -74,8 +78,8 @@ class Clusters:
         
 
     def classify(self,sample):
-        clustered = self.estimator.predict(sample)[np.newaxis]
-        return np.transpose(clustered)
+        clustered = self.estimator.predict(sample)
+        return clustered
 
     def classify_set(self,samples):
         clustered = []
@@ -87,27 +91,33 @@ class SignModel:
     def __init__(self,labels):
         self.labels = labels
         self.models = []
+        self.clusters = None
 
     def get_labels(self):
         return self.labels
 
     def train(self,train_X,train_Y,N):
         self.models = []
+        self.clusters = Clusters(20)
+        self.clusters.train(train_X)
+
         for i,label in enumerate(labels):
+            print label
             training_set = [x for x,y in zip(train_X,train_Y) if (y==i)]
 
-            created_model = False
-            n = N
-            while not created_model and n > 0:
-                try:
-                    model = hmm.GMMHMM(n,3) #not sure how to make this a left-right HMM
-                    model.fit(training_set)
-                    created_model = True
-                except ValueError:
-                    n-=1
-            if not created_model:
-                print "MODEL FAILED"
-                model = None
+            model = DiscreteHMM(N,20,verbose=True)
+            model.reset()
+            skip = 0
+            while len(training_set) and skip < 100:
+                obs = training_set.pop()
+                discrete_obs = self.clusters.classify(obs)
+                if model.forwardbackward(discrete_obs) > -10000000:
+                    model.train(discrete_obs,iterations=10)
+                else:
+                    training_set.insert(0,obs)
+                    random.shuffle(training_set)
+                    skip += 1
+
             self.models.append(model)
 
 
@@ -115,7 +125,7 @@ class SignModel:
         likelihoods = []
         for model in self.models:
             if model:
-                likelihoods.append(model.score(obs))
+                likelihoods.append(model.forwardbackward(self.clusters.classify(obs)))
             else:
                 likelihoods.append(0)
 
