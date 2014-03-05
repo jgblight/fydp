@@ -14,10 +14,6 @@ import featureExtraction as extract
 from sklearn.cross_validation import StratifiedKFold
 from sklearn.cluster import KMeans
 
-#from hmm.continuous.GMHMM import GMHMM
-#from hmm.discrete.DiscreteHMM import DiscreteHMM
-
-import hmm
 
 K = 30
 folds = 5
@@ -106,9 +102,9 @@ class SignModel:
         for i,label in enumerate(labels):
             training_set = [x for x,y in zip(train_X,train_Y) if (y==i)]
 
-            model = hmm.HMM(N,V=range(30))
+            model = hmm.MultinomialHMM(N)
             discrete_obs = self.clusters.classify_set(training_set)
-            model = hmm.baum_welch(model,discrete_obs)
+            model = model.train(discrete_obs)
 
             self.models.append(model)
 
@@ -117,7 +113,7 @@ class SignModel:
         likelihoods = []
         for model in self.models:
             if model:
-                likelihoods.append(hmm.forward(model,self.clusters.classify(obs))[0])
+                likelihoods.append(model.score(self.clusters.classify(obs)))
             else:
                 likelihoods.append(0)
         return np.nanargmax(likelihoods)
