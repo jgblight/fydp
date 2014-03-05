@@ -14,8 +14,10 @@ import featureExtraction as extract
 from sklearn.cross_validation import StratifiedKFold
 from sklearn.cluster import KMeans
 
-from hmm.continuous.GMHMM import GMHMM
-from hmm.discrete.DiscreteHMM import DiscreteHMM
+#from hmm.continuous.GMHMM import GMHMM
+#from hmm.discrete.DiscreteHMM import DiscreteHMM
+
+import hmm
 
 K = 30
 folds = 5
@@ -98,25 +100,15 @@ class SignModel:
 
     def train(self,train_X,train_Y,N):
         self.models = []
-        self.clusters = Clusters(20)
+        self.clusters = Clusters(30)
         self.clusters.train(train_X)
 
         for i,label in enumerate(labels):
-            print label
             training_set = [x for x,y in zip(train_X,train_Y) if (y==i)]
 
-            model = DiscreteHMM(N,20,verbose=True)
-            model.reset()
-            skip = 0
-            while len(training_set) and skip < 100:
-                obs = training_set.pop()
-                discrete_obs = self.clusters.classify(obs)
-                if model.forwardbackward(discrete_obs) > -10000000:
-                    model.train(discrete_obs,iterations=10)
-                else:
-                    training_set.insert(0,obs)
-                    random.shuffle(training_set)
-                    skip += 1
+            model = hmm.HMM(N,V=range(30))
+            discrete_obs = self.clusters.classify_set(training_set)
+            model = hmm.baum_welch(model,discrete_obs)
 
             self.models.append(model)
 
@@ -125,11 +117,10 @@ class SignModel:
         likelihoods = []
         for model in self.models:
             if model:
-                likelihoods.append(model.forwardbackward(self.clusters.classify(obs)))
+                likelihoods.append(hmm.forward(model,self.clusters.classify(obs))[0])
             else:
                 likelihoods.append(0)
-
-        return np.argmax(likelihoods)
+        return np.nanargmax(likelihoods)
 
 def getDataset(training_folder):
     #need to set up some sort of cross-validation
@@ -178,7 +169,8 @@ def evaluateModels(labels,dataset_X,dataset_Y,modelname,N):
 
         for x,y in zip(test_X,test_Y):
             prediction = model.predict(x)
-            confusion[prediction,y] += 1
+            if prediction is not np.nan:
+                confusion[prediction,y] += 1
             if prediction == y:
                 correct += 1
             all_samples += 1
