@@ -133,7 +133,7 @@ class ContinuousSignModel:
         for i,label in enumerate(labels):
             training_set = [x for x,y in zip(train_X,train_Y) if (y==i)]
 
-            model = hmm.GMMHMM(N,3)
+            model = hmm.GMMHMM(N,4)
             model.fit(training_set)
             self.models.append(model)
 
