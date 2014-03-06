@@ -14,6 +14,7 @@ import featureExtraction as extract
 from sklearn.cross_validation import StratifiedKFold
 from sklearn.cluster import KMeans
 
+import hmmpy
 
 K = 30
 folds = 5
@@ -85,7 +86,7 @@ class Clusters:
             clustered.append(self.classify(sample))
         return clustered
 
-class SignModel:
+class DiscreteSignModel:
     def __init__(self,labels):
         self.labels = labels
         self.models = []
@@ -102,9 +103,9 @@ class SignModel:
         for i,label in enumerate(labels):
             training_set = [x for x,y in zip(train_X,train_Y) if (y==i)]
 
-            model = hmm.MultinomialHMM(N)
+            model = hmmpy.HMM(N,V=range(30))
             discrete_obs = self.clusters.classify_set(training_set)
-            model = model.fit(discrete_obs)
+            model = hmmpy.baum_welch(model,discrete_obs)
 
             self.models.append(model)
 
@@ -113,10 +114,38 @@ class SignModel:
         likelihoods = []
         for model in self.models:
             if model:
-                likelihoods.append(model.score(self.clusters.classify(obs)))
+                likelihoods.append(hmmpy.forward(model,self.clusters.classify(obs))[0])
             else:
                 likelihoods.append(0)
         return np.nanargmax(likelihoods)
+
+class ContinuousSignModel:
+    def __init__(self,labels):
+        self.labels = labels
+        self.models = []
+
+    def get_labels(self):
+        return self.labels
+
+    def train(self,train_X,train_Y,N):
+        self.models = []
+
+        for i,label in enumerate(labels):
+            training_set = [x for x,y in zip(train_X,train_Y) if (y==i)]
+
+            model = hmm.GMMHMM(N,3)
+            model.fit(training_set)
+            self.models.append(model)
+
+    def predict(self,obs):
+        likelihoods = []
+        for model in self.models:
+            if model:
+                likelihoods.append(model.score(obs))
+            else:
+                likelihoods.append(0)
+        return np.nanargmax(likelihoods)
+
 
 def getDataset(training_folder):
     #need to set up some sort of cross-validation
@@ -160,7 +189,7 @@ def evaluateModels(labels,dataset_X,dataset_Y,modelname,N):
         test_X = [ dataset_X[i] for i in test ]
         test_Y = [ dataset_Y[i] for i in test ]
 
-        model = SignModel(labels)
+        model = ContinuousSignModel(labels)
         model.train(train_X,train_Y,N)
 
         for x,y in zip(test_X,test_Y):
@@ -200,7 +229,7 @@ def evaluateModels(labels,dataset_X,dataset_Y,modelname,N):
     return correct / float(all_samples)
 
 def createModel(labels,dataset_X,dataset_Y,modelname,N):
-    model = SignModel(labels)
+    model = ContinuousSignModel(labels)
     model.train(train_X,train_Y,N)
     # persist model
     pickler = open(modelname+".pkl","wb")
