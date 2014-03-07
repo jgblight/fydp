@@ -133,7 +133,7 @@ class ContinuousSignModel:
         for i,label in enumerate(labels):
             training_set = [x for x,y in zip(train_X,train_Y) if (y==i)]
 
-            model = hmm.GMMHMM(N,4)
+            model = hmm.GMMHMM(N[i],N[-1])
             model.fit(training_set)
             self.models.append(model)
 
@@ -174,7 +174,7 @@ def getDataset(training_folder):
 
     return labels,dataset_X,dataset_Y
 
-def evaluateModels(labels,dataset_X,dataset_Y,modelname,N):
+def evaluateModel(labels,dataset_X,dataset_Y,N):
     #jiggle hidden state parameter
 
     confusion = np.zeros([len(labels),len(labels)])
@@ -199,38 +199,32 @@ def evaluateModels(labels,dataset_X,dataset_Y,modelname,N):
             if prediction == y:
                 correct += 1
             all_samples += 1
-    
-    print "Accuracy"
-    print correct / float(all_samples)
-
-    precision = []
-    recall = []
-
-    for i in range(len(labels)):
-        precision.append(confusion[i,i] / float(sum(confusion[i,:])))
-        recall.append(confusion[i,i]/ float(sum(confusion[:,i])))
-
-    print "Precision: " + str(precision)
-    print "Recall: " + str(recall)
-
-    print confusion
-
-    with open(modelname+'.csv','w') as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerow(['Accuracy',correct / float(all_samples)])
-        writer.writerow(['Precision']+ precision)
-        writer.writerow(['Recall']+recall)
-
-        writer.writerow(['Confusion Matrix'])
-        writer.writerow(labels)
-        for row in confusion:
-            writer.writerow(row)
 
     return correct / float(all_samples)
 
+def randomSearch(labels,dataset_X,dataset_Y):
+    i = 0
+    n_parameters = len(labels)+1
+    N = np.random.randint(3,10,n_parameters)
+    accuracy = evaluateModel(labels,dataset_X,dataset_Y,N)
+    print N
+    print accuracy
+    while i < 20:
+        i += 1
+        new_N = np.copy(N)
+        new_N[np.random.randint(0,n_parameters)] = np.random.randint(3,10)
+        new_accuracy = evaluateModel(labels,dataset_X,dataset_Y,new_N)
+        if new_accuracy > accuracy:
+            N = new_N
+            accuracy = new_accuracy
+        print new_N
+        print str(accuracy) + "   " + str(new_accuracy)
+
+    return N
+
 def createModel(labels,dataset_X,dataset_Y,modelname,N):
     model = ContinuousSignModel(labels)
-    model.train(train_X,train_Y,N)
+    model.train(dataset_X,dataset_Y,N)
     # persist model
     pickler = open(modelname+".pkl","wb")
     pickle.dump(model,pickler)
@@ -252,14 +246,7 @@ if __name__ == "__main__":
         dataset_Y = pickle.load(modelfile)
 
 
-    max_accuracy = 0
-    best_N = 0
-    for N in range(3,11):
-        print "N = " + str(N)
-        accuracy = evaluateModels(labels,dataset_X,dataset_Y,sys.argv[1],N)
-        if accuracy > max_accuracy:
-            best_N = N
-            max_accuracy = accuracy
+    best_N = randomSearch(labels,dataset_X,dataset_Y)
 
     createModel(labels,dataset_X,dataset_Y,sys.argv[1],best_N)
 
