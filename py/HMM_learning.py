@@ -8,6 +8,8 @@ import time
 import pickle
 import csv
 import random
+from multiprocessing import Process,Pipe
+from itertools import izip
 
 from sklearn import hmm
 import featureExtraction as extract
@@ -222,6 +224,39 @@ def randomSearch(labels,dataset_X,dataset_Y):
 
     return N
 
+def spawn(f):
+    def fun(pipe,x):
+        pipe.send(f(x))
+        pipe.close()
+    return fun
+
+def parmap(f,X):
+    pipe=[Pipe() for x in X]
+    proc=[Process(target=spawn(f),args=(c,x)) for x,(p,c) in izip(X,pipe)]
+    [p.start() for p in proc]
+    [p.join() for p in proc]
+    return [p.recv() for (p,c) in pipe]
+
+def randomrandomSearch(labels,dataset_X,dataset_Y):
+
+    def generateRandomModel(seed):
+        np.random.seed(seed)
+        N = np.random.randint(3,10,len(labels)+1)
+        accuracy = evaluateModel(labels,dataset_X,dataset_Y,N)
+        return (N,accuracy)
+
+    results = parmap(generateRandomModel,range(20))
+
+    print results
+    accuracy = 0
+    N = []
+    for r in results:
+        if r[1] > accuracy:
+            N = r[0]
+            accuracy = [1]
+    return N
+
+
 def createModel(labels,dataset_X,dataset_Y,modelname,N):
     model = ContinuousSignModel(labels)
     model.train(dataset_X,dataset_Y,N)
@@ -246,7 +281,7 @@ if __name__ == "__main__":
         dataset_Y = pickle.load(modelfile)
 
 
-    best_N = randomSearch(labels,dataset_X,dataset_Y)
+    best_N = randomrandomSearch(labels,dataset_X,dataset_Y)
 
     createModel(labels,dataset_X,dataset_Y,sys.argv[1],best_N)
 
