@@ -125,9 +125,28 @@ class ContinuousSignModel:
     def __init__(self,labels):
         self.labels = labels
         self.models = []
+        self.threshold = None
 
     def get_labels(self):
         return self.labels
+
+    def create_threshold_model(self):
+        N = []
+        for m in self.models:
+            N.append(m.n_components)
+            n_mix = m.n_mix
+        states = np.sum(N)
+        A_t = np.zeros((states,states))
+        gmms = []
+        i_t = 0
+        for m in self.models:
+            gmms = gmms + m.gmms_
+            for i_m in range(m.n_components):
+                a = np.exp(m._log_transmat[i_m,i_m])
+                A_t[i_t,:] = (1-a)/float(states-1)
+                A_t[i_t,i_t] = a
+                i_t += 1
+        self.threshold = hmm.GMMHMM(states,n_mix,transmat=A_t,gmms=gmms)
 
     def train(self,train_X,train_Y,N):
         self.models = []
@@ -135,18 +154,24 @@ class ContinuousSignModel:
         for i,label in enumerate(labels):
             training_set = [x for x,y in zip(train_X,train_Y) if (y==i)]
 
-            model = hmm.GMMHMM(N[i],N[-1])
+            #A = np.zeros((N[i],N[i]))
+            #for j in range(N[i]):
+            #    A[j,j:j+4] = 1.0/(np.min((4,N[i]-j)))
+            model = hmm.GMMHMM(N[i],N[-1],n_iter=20)
             model.fit(training_set)
             self.models.append(model)
+        self.create_threshold_model()
 
     def predict(self,obs):
         likelihoods = []
         for model in self.models:
-            if model:
-                likelihoods.append(model.score(obs))
-            else:
-                likelihoods.append(0)
-        return np.nanargmax(likelihoods)
+            likelihoods.append(model.score(obs))
+        score = np.nanmax(likelihoods)
+        prediction =  np.nanargmax(likelihoods)
+        return prediction,score
+
+    def get_threshold(self,obs):
+        return self.threshold.score(obs)
 
 
 def getDataset(training_folder):
@@ -157,7 +182,7 @@ def getDataset(training_folder):
 
     for label in os.listdir(training_folder):
         label_path = os.path.join(training_folder,label)
-        if os.path.isdir(label_path):
+        if os.path.isdir(label_path) and not label == "GARBAGE":
             labels.append(label)
             label_index = len(labels) - 1
             print label
@@ -176,8 +201,29 @@ def getDataset(training_folder):
 
     return labels,dataset_X,dataset_Y
 
+def fragment_sample(obs):
+    frames = obs.shape[0]
+    window = 20
+    samples = int(np.floor(1.5*(frames/window)))
+    fragments = [obs]
+    if frames > window:
+        for i in range(samples):
+            start = np.random.randint(0,frames-window)
+            fragment = obs[start:start+window,:]
+            fragments.append(fragment)
+    return fragments
+
+def fragment(X,Y):
+    fragmented_X = []
+    fragmented_Y = []
+    for x,y in zip(X,Y):
+        fragments_X = fragment_sample(x)
+        for f in fragments_X:
+            fragmented_X.append(f)
+            fragmented_Y.append(y)
+    return fragmented_X,fragmented_Y
+
 def evaluateModel(labels,dataset_X,dataset_Y,N):
-    #jiggle hidden state parameter
 
     confusion = np.zeros([len(labels),len(labels)])
 
@@ -191,11 +237,16 @@ def evaluateModel(labels,dataset_X,dataset_Y,N):
         test_X = [ dataset_X[i] for i in test ]
         test_Y = [ dataset_Y[i] for i in test ]
 
+        #train_X,train_Y = fragment(train_X,train_Y)
+        #test_X,test_Y = fragment(test_X,test_Y)
+
         model = ContinuousSignModel(labels)
         model.train(train_X,train_Y,N)
 
         for x,y in zip(test_X,test_Y):
-            prediction = model.predict(x)
+            prediction,score = model.predict(x)
+            threshold = model.get_threshold(x)
+            #if score > threshold:
             if prediction is not np.nan:
                 confusion[prediction,y] += 1
             if prediction == y:
@@ -205,6 +256,8 @@ def evaluateModel(labels,dataset_X,dataset_Y,N):
     return correct / float(all_samples)
 
 def randomSearch(labels,dataset_X,dataset_Y):
+    np.random.seed(3)
+
     i = 0
     n_parameters = len(labels)+1
     N = np.random.randint(3,10,n_parameters)

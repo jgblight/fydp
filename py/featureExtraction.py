@@ -112,8 +112,8 @@ class colourFilter:
                     break
             moments = cv2.moments(cnt)
             if moments['m00'] > 0:
-                return (int(moments['m10']/moments['m00']),int(moments['m01']/moments['m00'])) 
-        return tuple([])
+                return np.array([int(moments['m10']/moments['m00']),int(moments['m01']/moments['m00'])])
+        return np.array([])
 
 class FeatureExtractor:
 
@@ -138,9 +138,33 @@ class FeatureExtractor:
 
     def getHandPosition(self,imbgr,imdepth,hand):
         centroid = self.markers[hand].getCombinedCentroid(imbgr, self.markers['glove'])
-        if centroid:
-            return np.append(centroid,imdepth[centroid[::-1]])
-        return np.array([np.nan,np.nan,np.nan])
+        if centroid.size:
+            return centroid
+        return np.array([np.nan,np.nan])
+
+    #this one is a bit hacky
+    def getVelocity(self,centroid,hand):
+        if not self.memory.size:
+            return [np.nan,np.nan]
+
+        time_diff = float(self.timeline[-1] - self.timeline[-2])
+        lastcentroid = [np.nan,np.nan]
+        if hand == 'left':
+            lastcentroid = self.memory[-1,(14,15)]
+        if hand == 'right':
+            lastcentroid = self.memory[-1,(16,17)]
+
+        position_diff = centroid-lastcentroid
+        return position_diff / time_diff
+
+    def getCentroidDistance(self,imbgr,hand):
+        centroid = self.markers[hand].getCombinedCentroid(imbgr, self.markers['glove'])
+        hull = self.markers[hand].getColourHull(imbgr)
+        if centroid.size and len(hull):
+            moments = cv2.moments(hull)
+            finger_centroid = np.array([int(moments['m10']/moments['m00']),int(moments['m01']/moments['m00'])])
+            return finger_centroid - centroid
+        return np.array([np.nan,np.nan])
 
     def getCentralMoments(self,imbgr,hand):
         hull = self.markers[hand].getColourHull(imbgr)
@@ -175,8 +199,14 @@ class FeatureExtractor:
         rightmoments,_ = self.getCentralMoments(imbgr,'right') #7-13
         v = np.append(v,leftmoments)
         v = np.append(v,rightmoments)
-        v = np.append(v,self.getHandPosition(imbgr,imdepth,'left')) #14-16
-        v = np.append(v,self.getHandPosition(imbgr,imdepth,'right')) #17-19
+        leftcentroid = self.getHandPosition(imbgr,imdepth,'left')
+        rightcentroid = self.getHandPosition(imbgr,imdepth,'right')
+        v = np.append(v,leftcentroid) #14-16 (14,15)
+        v = np.append(v,rightcentroid) #17-19 (16,17)
+        #v = np.append(v,self.getVelocity(leftcentroid,'left')) #20 (18,19)
+        #v = np.append(v,self.getVelocity(rightcentroid,'right')) #21 (20,21)
+        #v = np.append(v,self.getCentroidDistance(imbgr,'left')) #20 (18,19)
+        #v = np.append(v,self.getCentroidDistance(imbgr,'right')) #21 (20,21)
         return v
 
     #keeping a memory of "smoothing_memory" frames for now
@@ -197,7 +227,7 @@ class FeatureExtractor:
         if self.features.shape != (0,):
             self.features = np.vstack((self.features,smoothed))
         else:
-            self.features = smoothed
+            self.features = smoothed[np.newaxis]
         return smoothed
 
     def normalize(self,indices):
@@ -207,5 +237,5 @@ class FeatureExtractor:
             self.features[:,indices] = (self.features[:,indices] - nanmin)/(nanmax-nanmin)
 
     def getFeatures(self):
-        self.normalize([14,15,16,17,18,19])
+        self.normalize([14,15,16,17])
         return self.features

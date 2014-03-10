@@ -38,6 +38,7 @@ if __name__ == "__main__":
             cv2.drawContours(imbgr,[redhull],-1,(0,0,255),2)
 
             feature = f.addPoint(time.time(),imbgr,imdepth)
+            print feature
 
             if feature.shape:
                 ax.scatter(feature[14],255 - feature[16],480 - feature[15],c='r')
