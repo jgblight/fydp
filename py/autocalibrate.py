@@ -141,7 +141,7 @@ def autocalibrate(g_m,r_m,b_m,c):
     while 1:
         try:
             imbgr = np.array(fe.get_video())
-            iterations = 20 
+            iterations = 10 
 
 
             if not got_green:
@@ -150,10 +150,8 @@ def autocalibrate(g_m,r_m,b_m,c):
                 error = get_error(imbgr,glow,ghigh,g_m)
                 if gcount == 0:
                     restart = np.random.uniform()
-                    print restart
-                    if restart < 0.5:
+                    if restart < 0.3:
                         glow,ghigh = get_start(c,'glow','ghigh')
-                        print 'restart'
                     while i < iterations:
                         d = 10 * (iterations-i)/float(iterations)
                         d_low = np.random.choice([-1,0,1],3)*d
@@ -175,9 +173,9 @@ def autocalibrate(g_m,r_m,b_m,c):
                 if error < 0.02:
                     gcount += 1
                 elif gcount > 0:
-                    gcount -= 1
+                    gcount -= 2
 
-                if gcount > 5:
+                if gcount > 10:
                     got_green = True
 
 
@@ -205,29 +203,38 @@ def autocalibrate(g_m,r_m,b_m,c):
             #    if error < 0.05:
             #        got_blue = True
 
-            #if not got_red:
-            #    print 'red'
-            #    i = 0
-            #    error = get_error(imbgr,rlow,rhigh,g_m)
-            #    while i < iterations:
-            #        d_low = np.random.choice([-1,0,1],3)
-            #        d_high = np.random.choice([-1,0,1],3)
+            if not got_red:
+                print 'red'
+                i = 0
+                error = get_error(imbgr,rlow,rhigh,g_m)
+                if rcount == 0:
+                    restart = np.random.uniform()
+                    if restart < 0.3:
+                        rlow,rhigh = get_start(c,'rlow','rhigh')
+                    while i < iterations:
+                        d_low = np.random.choice([-1,0,1],3)
+                        d_high = np.random.choice([-1,0,1],3)
 
-            #        new_error = get_error(imbgr,rlow+d_low,rhigh,g_m)
-            #        if new_error < error:
-            #            error = new_error
-            #            rlow = rlow+d_low 
-                        
-            #        new_error = get_error(imbgr,rlow,rhigh+d_high,g_m)
-            #        if new_error < error:
-            #            error = new_error
-            #            rhigh = rhigh+d_high  
+                        new_error = get_error(imbgr,rlow+d_low,rhigh,g_m)
+                        if new_error < error:
+                            error = new_error
+                            rlow = rlow+d_low 
+                            
+                        new_error = get_error(imbgr,rlow,rhigh+d_high,g_m)
+                        if new_error < error:
+                            error = new_error
+                            rhigh = rhigh+d_high  
 
-            #        i += 1  
+                        i += 1  
 
-            #    print error
-            #    if error < 0.01:
-            #        got_red = True
+                print error
+                if error < 0.05:
+                    rcount += 1
+                elif rcount > 0:
+                    rcount -= 2
+
+                if rcount > 10:
+                    got_red = True
 
             
             green = fe.colourFilter(glow,ghigh)   
@@ -235,10 +242,10 @@ def autocalibrate(g_m,r_m,b_m,c):
             if len(hull):
                 cv2.drawContours(imbgr,[hull],-1,(0,255,0),2) 
 
-            #red = fe.colourFilter(rlow,rhigh)   
-            #hull = green.getColourHull(imbgr)   
-            #if len(hull):
-            #    cv2.drawContours(imbgr,[hull],-1,(0,0,255),2) 
+            red = fe.colourFilter(rlow,rhigh)   
+            hull = red.getColourHull(imbgr)   
+            if len(hull):
+                cv2.drawContours(imbgr,[hull],-1,(0,0,255),2) 
 
             #blue = fe.colourFilter(blow,bhigh)   
             #cnt = blue.getColourContours(imbgr)
