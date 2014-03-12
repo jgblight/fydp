@@ -11,8 +11,8 @@ import featureExtraction as fe
 def blue_contours(cnt):
     cnt_sorted = sorted(cnt,key=cv2.contourArea)
     if len(cnt_sorted) >= 2:
-        largest1 = cnt_sorted[-1]
-        largest2 = cnt_sorted[-2]
+        largest1 = cv2.convexHull(cnt_sorted[-1])
+        largest2 = cv2.convexHull(cnt_sorted[-2])
         l1_m = cv2.moments(largest1)
         l2_m = cv2.moments(largest2)
         try:
@@ -124,6 +124,42 @@ def get_start(c,low_key,high_key):
         high[i] = np.random.uniform(np.max([np.min(history),low[i]]),np.max(history))
     return low,high
 
+def optimize(imbgr,got,frame_count,low,high,c,low_key,high_key,threshold,blue=False):
+    iterations = 10
+    if not got:
+        i = 0
+        error = get_error(imbgr,low,high,g_m,blue)
+        if frame_count == 0:
+            restart = np.random.uniform()
+            if restart < 0.3:
+                low,high = get_start(c,low_key,high_key)
+            while i < iterations:
+                d = 10 * (iterations-i)/float(iterations)
+                d_low = np.random.choice([-1,0,1],3)*d
+                d_high = np.random.choice([-1,0,1],3)*d
+
+                new_error = get_error(imbgr,low+d_low,high,g_m,blue)
+                if new_error < error:
+                    error = new_error
+                    low = low+d_low 
+                    
+                new_error = get_error(imbgr,low,high+d_high,g_m,blue)
+                if new_error < error:
+                    error = new_error
+                    high = high+d_high  
+
+                i += 1  
+
+        print error
+        if error < threshold:
+            frame_count += 1
+        elif frame_count > 0:
+            frame_count = 0
+
+        if frame_count > 10:
+            got = True
+    return got,frame_count,low,high
+
 def autocalibrate(g_m,r_m,b_m,c):
 
     got_green = False
@@ -133,6 +169,7 @@ def autocalibrate(g_m,r_m,b_m,c):
     gcount = 0
     bcount = 0
     rcount = 0
+    frame_count = 0
 
     glow,ghigh = get_start(c,'glow','ghigh')
     blow,bhigh = get_start(c,'blow','bhigh')
@@ -141,101 +178,13 @@ def autocalibrate(g_m,r_m,b_m,c):
     while 1:
         try:
             imbgr = np.array(fe.get_video())
-            iterations = 10 
 
-
-            if not got_green:
-                print 'green'
-                i = 0
-                error = get_error(imbgr,glow,ghigh,g_m)
-                if gcount == 0:
-                    restart = np.random.uniform()
-                    if restart < 0.3:
-                        glow,ghigh = get_start(c,'glow','ghigh')
-                    while i < iterations:
-                        d = 10 * (iterations-i)/float(iterations)
-                        d_low = np.random.choice([-1,0,1],3)*d
-                        d_high = np.random.choice([-1,0,1],3)*d
-
-                        new_error = get_error(imbgr,glow+d_low,ghigh,g_m)
-                        if new_error < error:
-                            error = new_error
-                            glow = glow+d_low 
-                            
-                        new_error = get_error(imbgr,glow,ghigh+d_high,g_m)
-                        if new_error < error:
-                            error = new_error
-                            ghigh = ghigh+d_high  
-
-                        i += 1  
-
-                print error
-                if error < 0.02:
-                    gcount += 1
-                elif gcount > 0:
-                    gcount -= 2
-
-                if gcount > 10:
-                    got_green = True
-
-
-            #if not got_blue:
-            #    print 'blue'
-            #    i = 0
-            #    error = get_error(imbgr,blow,bhigh,b_m,blue=True)
-            #    while i < iterations:
-            #        d_low = np.random.choice([-1,0,1],3)
-            #        d_high = np.random.choice([-1,0,1],3)
-
-            #        new_error = get_error(imbgr,blow+d_low,bhigh,b_m,blue=True)
-            #        if new_error < error:
-            #            error = new_error
-            #            blow = blow+d_low 
-            #            
-            #        new_error = get_error(imbgr,blow,bhigh+d_high,b_m,blue=True)
-            #        if new_error < error:
-            #            error = new_error
-            #            bhigh = bhigh+d_high  
-
-            #        i += 1  
-
-            #    print error
-            #    if error < 0.05:
-            #        got_blue = True
-
-            if not got_red:
-                print 'red'
-                i = 0
-                error = get_error(imbgr,rlow,rhigh,g_m)
-                if rcount == 0:
-                    restart = np.random.uniform()
-                    if restart < 0.3:
-                        rlow,rhigh = get_start(c,'rlow','rhigh')
-                    while i < iterations:
-                        d_low = np.random.choice([-1,0,1],3)
-                        d_high = np.random.choice([-1,0,1],3)
-
-                        new_error = get_error(imbgr,rlow+d_low,rhigh,g_m)
-                        if new_error < error:
-                            error = new_error
-                            rlow = rlow+d_low 
-                            
-                        new_error = get_error(imbgr,rlow,rhigh+d_high,g_m)
-                        if new_error < error:
-                            error = new_error
-                            rhigh = rhigh+d_high  
-
-                        i += 1  
-
-                print error
-                if error < 0.05:
-                    rcount += 1
-                elif rcount > 0:
-                    rcount -= 2
-
-                if rcount > 10:
-                    got_red = True
-
+            print "green"
+            got_green,gcount,glow,ghigh = optimize(imbgr,got_green,gcount,glow,ghigh,c,"glow","ghigh",0.02)
+            print "red"
+            got_red,rcount,rlow,rhigh = optimize(imbgr,got_red,rcount,rlow,rhigh,c,"rlow","rhigh",0.04)
+            print "blue"
+            got_blue,bcount,blow,bhigh = optimize(imbgr,got_blue,bcount,blow,bhigh,c,"blow","bhigh",0.05)
             
             green = fe.colourFilter(glow,ghigh)   
             hull = green.getColourHull(imbgr)   
@@ -247,19 +196,33 @@ def autocalibrate(g_m,r_m,b_m,c):
             if len(hull):
                 cv2.drawContours(imbgr,[hull],-1,(0,0,255),2) 
 
-            #blue = fe.colourFilter(blow,bhigh)   
-            #cnt = blue.getColourContours(imbgr)
-            #if len(cnt) >= 2:
-            #    cnt_sorted = sorted(cnt,key=cv2.contourArea)
-            #    cv2.drawContours(imbgr,[cnt_sorted[-1]],-1,(255,0,0),2)  
-            #    cv2.drawContours(imbgr,[cnt_sorted[-2]],-1,(255,0,0),2)  
+            blue = fe.colourFilter(blow,bhigh)   
+            cnt = blue.getColourContours(imbgr)
+            if len(cnt) >= 2:
+                cnt_sorted = sorted(cnt,key=cv2.contourArea)
+                cv2.drawContours(imbgr,[cnt_sorted[-1]],-1,(255,0,0),2)  
+                cv2.drawContours(imbgr,[cnt_sorted[-2]],-1,(255,0,0),2)  
 
             cv2.imshow("Demo",imbgr)
+
+        if got_green and got_red and got_blue:
+            frame_count += 1
 
         except KeyboardInterrupt:
             break
         if cv.WaitKey(10) == 32:
-            break 
+            break
+        if frame_count >= 15:
+            break
+
+    with open(sys.argv[1],'w') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(glow)
+        writer.writerow(ghigh)
+        writer.writerow(blow)
+        writer.writerow(bhigh)
+        writer.writerow(rlow)
+        writer.writerow(rhigh)
 
 
 
