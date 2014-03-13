@@ -47,6 +47,7 @@ def main():
 
                 if score > threshold:
                     detected = True
+                    print labels[prediction] + "   " + str(obs.shape[0])
                 else:
                     if detected:
                         detected = False
@@ -58,8 +59,9 @@ def main():
                             prediction_short,score = model.predict(obs_short)
                             threshold = model.get_threshold(obs_short)
                             if score>threshold:
-                               detected = True
-                               prediction = prediction_short
+                                detected = True
+                                prediction = prediction_short
+                                print labels[prediction] + "   " + str(obs.shape[0])
 
                 if detected:
                     cv2.putText(imbgr,labels[prediction],(5,50),cv2.FONT_HERSHEY_COMPLEX,2,(0,0,255),5)

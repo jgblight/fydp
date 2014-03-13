@@ -188,7 +188,7 @@ def getDataset(training_folder):
             print label
             for capture in os.listdir(label_path):
                 capture_path = os.path.join(label_path,capture)
-                if os.path.isdir(capture_path):
+                if os.path.isdir(capture_path) and not capture in ['golf1','golf2']:
                     f = extract.FeatureExtractor(os.path.join(capture_path,"calibration.csv"))
                     f.setStartPoint()
                     for timestamp,imbgr,imdepth in FakenectReader(capture_path):
@@ -196,7 +196,7 @@ def getDataset(training_folder):
 
                     feature = f.getFeatures()
                     if feature.size:
-                        dataset_X.append(np.nan_to_num(feature))
+                        dataset_X.append(np.nan_to_num(feature[:-5,:]))
                         dataset_Y.append(label_index)
 
     return labels,dataset_X,dataset_Y
@@ -245,7 +245,7 @@ def evaluateModel(labels,dataset_X,dataset_Y,N):
 
         for x,y in zip(test_X,test_Y):
             prediction,score = model.predict(x)
-            threshold = model.get_threshold(x)
+            #threshold = model.get_threshold(x)
             #if score > threshold:
             if prediction is not np.nan:
                 confusion[prediction,y] += 1
@@ -293,9 +293,11 @@ def parmap(f,X):
 def randomrandomSearch(labels,dataset_X,dataset_Y):
 
     def generateRandomModel(seed):
+        print "start"
         np.random.seed(seed)
         N = np.random.randint(3,10,len(labels)+1)
         accuracy = evaluateModel(labels,dataset_X,dataset_Y,N)
+        print "finish"
         return (N,accuracy)
 
     results = parmap(generateRandomModel,range(20))

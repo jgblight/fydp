@@ -115,6 +115,7 @@ class colourFilter:
                 return np.array([int(moments['m10']/moments['m00']),int(moments['m01']/moments['m00'])])
         return np.array([])
 
+
 class FeatureExtractor:
 
     def __init__(self,calibration):

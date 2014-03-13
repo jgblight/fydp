@@ -5,6 +5,7 @@ import sys
 import cv2
 import cv
 import pickle
+import csv
 
 import featureExtraction as fe
 
@@ -131,7 +132,7 @@ def optimize(imbgr,got,frame_count,low,high,c,low_key,high_key,threshold,blue=Fa
         error = get_error(imbgr,low,high,g_m,blue)
         if frame_count == 0:
             restart = np.random.uniform()
-            if restart < 0.3:
+            if restart*error > threshold*1.5:
                 low,high = get_start(c,low_key,high_key)
             while i < iterations:
                 d = 10 * (iterations-i)/float(iterations)
@@ -180,11 +181,11 @@ def autocalibrate(g_m,r_m,b_m,c):
             imbgr = np.array(fe.get_video())
 
             print "green"
-            got_green,gcount,glow,ghigh = optimize(imbgr,got_green,gcount,glow,ghigh,c,"glow","ghigh",0.02)
+            got_green,gcount,glow,ghigh = optimize(imbgr,got_green,gcount,glow,ghigh,c,"glow","ghigh",0.03)
             print "red"
             got_red,rcount,rlow,rhigh = optimize(imbgr,got_red,rcount,rlow,rhigh,c,"rlow","rhigh",0.04)
             print "blue"
-            got_blue,bcount,blow,bhigh = optimize(imbgr,got_blue,bcount,blow,bhigh,c,"blow","bhigh",0.05)
+            got_blue,bcount,blow,bhigh = optimize(imbgr,got_blue,bcount,blow,bhigh,c,"blow","bhigh",0.03)
             
             green = fe.colourFilter(glow,ghigh)   
             hull = green.getColourHull(imbgr)   
@@ -205,14 +206,14 @@ def autocalibrate(g_m,r_m,b_m,c):
 
             cv2.imshow("Demo",imbgr)
 
-        if got_green and got_red and got_blue:
-            frame_count += 1
+            if got_green and got_red and got_blue:
+                frame_count += 1
 
         except KeyboardInterrupt:
             break
         if cv.WaitKey(10) == 32:
             break
-        if frame_count >= 15:
+        if frame_count >= 30:
             break
 
     with open(sys.argv[1],'w') as csvfile:
