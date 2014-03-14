@@ -170,9 +170,12 @@ class ContinuousSignModel:
         prediction =  np.nanargmax(likelihoods)
         return prediction,score
 
+    def get_score(self, obs, index):
+        score = self.models[index].score(obs)
+        return score
+
     def get_threshold(self,obs):
         return self.threshold.score(obs)
-
 
 def getDataset(training_folder):
     #need to set up some sort of cross-validation
