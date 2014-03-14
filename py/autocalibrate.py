@@ -12,8 +12,8 @@ import featureExtraction as fe
 def blue_contours(cnt):
     cnt_sorted = sorted(cnt,key=cv2.contourArea)
     if len(cnt_sorted) >= 2:
-        largest1 = cv2.convexHull(cnt_sorted[-1])
-        largest2 = cv2.convexHull(cnt_sorted[-2])
+        largest1 = cnt_sorted[-1]
+        largest2 = cnt_sorted[-2]
         l1_m = cv2.moments(largest1)
         l2_m = cv2.moments(largest2)
         try:
@@ -181,11 +181,11 @@ def autocalibrate(g_m,r_m,b_m,c):
             imbgr = np.array(fe.get_video())
 
             print "green"
-            got_green,gcount,glow,ghigh = optimize(imbgr,got_green,gcount,glow,ghigh,c,"glow","ghigh",0.03)
+            got_green,gcount,glow,ghigh = optimize(imbgr,got_green,gcount,glow,ghigh,c,"glow","ghigh",0.04)
             print "red"
             got_red,rcount,rlow,rhigh = optimize(imbgr,got_red,rcount,rlow,rhigh,c,"rlow","rhigh",0.04)
             print "blue"
-            got_blue,bcount,blow,bhigh = optimize(imbgr,got_blue,bcount,blow,bhigh,c,"blow","bhigh",0.03)
+            got_blue,bcount,blow,bhigh = optimize(imbgr,got_blue,bcount,blow,bhigh,c,"blow","bhigh",0.05)
             
             green = fe.colourFilter(glow,ghigh)   
             hull = green.getColourHull(imbgr)   

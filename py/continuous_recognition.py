@@ -56,11 +56,11 @@ def main():
                     else:
                         for i in range(1,obs.shape[0]/10):
                             obs_short = obs[i*10:,:]
-                            prediction_short,score = model.predict(obs_short)
+                            prediction,score = model.predict(obs_short)
                             threshold = model.get_threshold(obs_short)
                             if score>threshold:
                                 detected = True
-                                prediction = prediction_short
+                                #prediction = prediction_short
                                 print labels[prediction] + "   " + str(obs.shape[0])
 
                 if detected:

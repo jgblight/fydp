@@ -13,7 +13,7 @@ import hashlib
 import functools
 import scipy.stats as stats
 
-smoothing_memory = 10
+smoothing_memory = 5
 
 class memoize(object):
     def __init__(self, func):
@@ -99,6 +99,23 @@ class colourFilter:
         contours, hierarchy = cv2.findContours(imfilter,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
         return contours
 
+    def getCombinedHull(self,imbgr,blue):
+        imfilter = self.inRange(imbgr) + blue.inRange(imbgr)
+        imfilter = self.blobSmoothing(imfilter)
+
+        contours, hierarchy = cv2.findContours(imfilter,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+        start = self.getStartingPoint(imbgr)
+
+        if start:
+            for cnt in contours:
+                if cv2.pointPolygonTest(cnt,start,False) == 1:
+                    break
+            fingers = self.getColourContours(imbgr)
+            for i in fingers:
+                cnt = np.concatenate((cnt,i))
+            return cv2.convexHull(cnt)
+        return np.array([])        
+
     def getCombinedCentroid(self, imbgr, blue):
         imfilter = self.inRange(imbgr) + blue.inRange(imbgr)
         imfilter = self.blobSmoothing(imfilter)
@@ -110,6 +127,9 @@ class colourFilter:
             for cnt in contours:
                 if cv2.pointPolygonTest(cnt,start,False) == 1:
                     break
+            fingers = self.getColourContours(imbgr)
+            for i in fingers:
+                cnt = np.concatenate((cnt,i))
             moments = cv2.moments(cnt)
             if moments['m00'] > 0:
                 return np.array([int(moments['m10']/moments['m00']),int(moments['m01']/moments['m00'])])
@@ -176,6 +196,15 @@ class FeatureExtractor:
             feature = [0,0,0,0,0,0,0]
         return feature,hull
 
+    def getCombinedMoments(self,imbgr,hand):
+        hull = self.markers[hand].getCombinedHull(imbgr, self.markers['glove'])
+        if len(hull):
+            m = cv2.moments(hull)
+            feature = [m['nu20'],m['nu11'],m['nu02'],m['nu30'],m['nu21'],m['nu12'],m['nu03']]
+        else:
+            feature = [0,0,0,0,0,0,0]
+        return feature,hull
+
     def getHuMoments(self,imbgr,hand):
         hull = self.markers[hand].getColourHull(imbgr)
         if len(hull):
@@ -204,6 +233,10 @@ class FeatureExtractor:
         rightcentroid = self.getHandPosition(imbgr,imdepth,'right')
         v = np.append(v,leftcentroid) #14-16 (14,15)
         v = np.append(v,rightcentroid) #17-19 (16,17)
+        #leftmoments,_ = self.getCombinedMoments(imbgr,'left') 
+        #rightmoments,_ = self.getCombinedMoments(imbgr,'right') 
+        #v = np.append(v,leftmoments)
+        #v = np.append(v,rightmoments)
         #v = np.append(v,self.getVelocity(leftcentroid,'left')) #20 (18,19)
         #v = np.append(v,self.getVelocity(rightcentroid,'right')) #21 (20,21)
         #v = np.append(v,self.getCentroidDistance(imbgr,'left')) #20 (18,19)

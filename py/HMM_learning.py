@@ -245,15 +245,13 @@ def evaluateModel(labels,dataset_X,dataset_Y,N):
 
         for x,y in zip(test_X,test_Y):
             prediction,score = model.predict(x)
-            #threshold = model.get_threshold(x)
-            #if score > threshold:
             if prediction is not np.nan:
                 confusion[prediction,y] += 1
             if prediction == y:
                 correct += 1
             all_samples += 1
 
-    return correct / float(all_samples)
+    return (correct / float(all_samples)),confusion
 
 def randomSearch(labels,dataset_X,dataset_Y):
     np.random.seed(3)
@@ -268,7 +266,7 @@ def randomSearch(labels,dataset_X,dataset_Y):
         i += 1
         new_N = np.copy(N)
         new_N[np.random.randint(0,n_parameters)] = np.random.randint(3,10)
-        new_accuracy = evaluateModel(labels,dataset_X,dataset_Y,new_N)
+        new_accuracy,_ = evaluateModel(labels,dataset_X,dataset_Y,new_N)
         if new_accuracy > accuracy:
             N = new_N
             accuracy = new_accuracy
@@ -296,7 +294,7 @@ def randomrandomSearch(labels,dataset_X,dataset_Y):
         print "start"
         np.random.seed(seed)
         N = np.random.randint(3,10,len(labels)+1)
-        accuracy = evaluateModel(labels,dataset_X,dataset_Y,N)
+        accuracy,_ = evaluateModel(labels,dataset_X,dataset_Y,N)
         print "finish"
         return (N,accuracy)
 
@@ -337,6 +335,9 @@ if __name__ == "__main__":
 
 
     best_N = randomrandomSearch(labels,dataset_X,dataset_Y)
+    accuracy,confusion = evaluateModel(labels,dataset_X,dataset_Y,best_N)
+    print 'Accuracy: ' + str(accuracy)
+    print confusion
 
     createModel(labels,dataset_X,dataset_Y,sys.argv[1],best_N)
 
