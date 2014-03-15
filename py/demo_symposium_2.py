@@ -20,15 +20,39 @@ if __name__ == "__main__":
 
     f = fe.FeatureExtractor(sys.argv[1])
 
-    for i in range(2):
+    for i in range(3):
         try:
 
-            big = 0
-            small = 8
             f.setStartPoint()
             detectedSign = 0
 
-            while detectedSign < 30:
+            if i == 0:
+                sign1 = 0
+                sign2 = 8
+                question = "A BIG pet dog or a SMALL one?"
+                sign1Location = "/home/sara/fydp/py/husky.png"
+                sign2Location = "/home/sara/fydp/py/chihuahua.png"
+                showText1 = "A BIG dog!"
+                showText2 = "A SMALL dog!"
+            elif i == 1:
+                sign1 = 3
+                sign2 = 6
+                question = "Stay at your HOUSE or go to a MOVIE?"
+                sign1Location = "/home/sara/fydp/py/husky.png"
+                sign2Location = "/home/sara/fydp/py/chihuahua.png"
+                showText1 = "Booooring"
+                showText2 = "Can I come?"
+
+            elif i == 2:
+                sign1 = 5
+                sign2 = 1
+                question = "Stuck on a desert island with your MOTHER or your CAT?"
+                sign1Location = "/home/sara/fydp/py/husky.png"
+                sign2Location = "/home/sara/fydp/py/chihuahua.png"                
+                showText1 = "Your MOTHER??"
+                showText2 = "Your CAT??"
+
+            while detectedSign < 50:
                 try:
                     
                     imbgr = np.array(fe.get_video())
@@ -36,32 +60,33 @@ if __name__ == "__main__":
                     if not detectedSign:
 
                         imdepth = np.array(fe.get_depth())
-
-                        cv2.putText(imbgr,"A big pet dog or a small one?",(5,50),cv2.FONT_HERSHEY_COMPLEX,1,(0,0,0),3)
-
+                        cv2.putText(imbgr,question,(5,50),cv2.FONT_HERSHEY_COMPLEX,1,(0,0,0),3)
                         v = f.addPoint(time.time(),imbgr,imdepth)
                       
                         obs = np.nan_to_num(f.getFeatures())
-                        bigDetected = models.detect(obs, big)
-                        smallDetected = models.detect(obs, small)
-                        
-                        if bigDetected:
-                            showimage = cv2.imread("chihuahua.png",0)
-                            showtext = "A big dog!"
+
+                        sign1Detected = models.detect(obs, sign1)
+                        sign2Detected = models.detect(obs, sign2)
+
+                        cv2.imshow("Demo",imbgr)
+ 
+                        if sign1Detected:
+                            showimage = cv2.imread(sign1Location,0)
+                            showtext = showText1
                             detectedSign = 1
 
-                        if smallDetected:
-                            showimage = cv2.imread("chihuahua.png",0)
-                            showtext = "A small dog!"
+                        if sign2Detected:
+                            showimage = cv2.imread(sign2Location,0)
+                            showtext = showText2
                             detectedSign = 1
 
-                    if detectedSign and detectedSign < 30:
+                    if detectedSign and detectedSign < 50:
                         cv2.putText(showimage, showtext ,(5,50),cv2.FONT_HERSHEY_COMPLEX,2,(255,255,255),5)
-                        cv2.imshow("test",showimage)
+                        cv2.imshow("Demo",showimage)
                         detectedSign += 1
 
 
-                    cv2.imshow("Demo",imbgr)
+                   #cv2.imshow("Demo",imbgr)
 
                 except KeyboardInterrupt:
                     break
