@@ -19,9 +19,12 @@ if __name__ == "__main__":
     labels = models.labels
 
     f = fe.FeatureExtractor(sys.argv[1])
-    for i in range(10):
+
+    for i in range(2):
         try:
-            rand_sign = np.random.randint(0,len(labels))
+
+            big = 0
+            small = 8
             f.setStartPoint()
             detectedSign = 0
 
@@ -31,25 +34,31 @@ if __name__ == "__main__":
                     imbgr = np.array(fe.get_video())
 
                     if not detectedSign:
+
                         imdepth = np.array(fe.get_depth())
 
-                        if not detectedSign:
-                              cv2.putText(imbgr,labels[rand_sign],(5,50),cv2.FONT_HERSHEY_COMPLEX,2,(0,0,0),5)
+                        cv2.putText(imbgr,"A big pet dog or a small one?",(5,50),cv2.FONT_HERSHEY_COMPLEX,1,(0,0,0),3)
 
                         v = f.addPoint(time.time(),imbgr,imdepth)
-                        
-
+                      
                         obs = np.nan_to_num(f.getFeatures())
-                        detected = models.detect(obs,rand_sign)
-                        if detected:
+                        bigDetected = models.detect(obs, big)
+                        smallDetected = models.detect(obs, small)
+                        
+                        if bigDetected:
+                            showimage = cv2.imread("chihuahua.png",0)
+                            showtext = "A big dog!"
                             detectedSign = 1
 
-                    #print feedback                        
+                        if smallDetected:
+                            showimage = cv2.imread("chihuahua.png",0)
+                            showtext = "A small dog!"
+                            detectedSign = 1
+
                     if detectedSign and detectedSign < 30:
-                            imbgr = np.zeros((480,640,3))
-                            cv2.putText(imbgr, "Excellent!" ,(5,50),cv2.FONT_HERSHEY_COMPLEX,2,(255,255,255),5)
-                            cv2.imshow("Demo",imbgr)
-                            detectedSign += 1
+                        cv2.putText(showimage, showtext ,(5,50),cv2.FONT_HERSHEY_COMPLEX,2,(255,255,255),5)
+                        cv2.imshow("test",showimage)
+                        detectedSign += 1
 
 
                     cv2.imshow("Demo",imbgr)
@@ -61,5 +70,3 @@ if __name__ == "__main__":
                 
         except KeyboardInterrupt:
                 break
-
-
