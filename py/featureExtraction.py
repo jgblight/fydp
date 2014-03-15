@@ -116,6 +116,18 @@ class colourFilter:
             return cv2.convexHull(cnt)
         return np.array([])        
 
+    def getCentroid(self,imbgr):
+        fingers = self.getColourContours(imbgr)
+        if len(fingers):
+            mergeContour = fingers[0]
+            for i in fingers[1:]:
+                mergeContour = np.concatenate((mergeContour,i))
+            moments = cv2.moments(mergeContour)
+            if moments['m00'] > 0:
+                return np.array([int(moments['m10']/moments['m00']),int(moments['m01']/moments['m00'])])
+        return np.array([])
+
+
     def getCombinedCentroid(self, imbgr, blue):
         imfilter = self.inRange(imbgr) + blue.inRange(imbgr)
         imfilter = self.blobSmoothing(imfilter)
@@ -159,6 +171,7 @@ class FeatureExtractor:
 
     def getHandPosition(self,imbgr,imdepth,hand):
         centroid = self.markers[hand].getCombinedCentroid(imbgr, self.markers['glove'])
+        #centroid = self.markers[hand].getCentroid(imbgr)
         if centroid.size:
             return centroid
         return np.array([np.nan,np.nan])

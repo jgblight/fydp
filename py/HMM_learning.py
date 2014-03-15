@@ -184,7 +184,7 @@ class ContinuousSignModel:
                 zero_counter += 1
             else:
                 zero_counter = 0
-            if zero_counter > 10:
+            if zero_counter > 5:
                 cutoff = i + 1
 
         obs = obs[cutoff:,:]
@@ -215,21 +215,21 @@ def getDataset(training_folder):
 
     for label in os.listdir(training_folder):
         label_path = os.path.join(training_folder,label)
-        if os.path.isdir(label_path) and not label == "GARBAGE":
+        if os.path.isdir(label_path):
             labels.append(label)
             label_index = len(labels) - 1
             print label
             for capture in os.listdir(label_path):
                 capture_path = os.path.join(label_path,capture)
-                if os.path.isdir(capture_path) and not capture in ['golf1','golf2']:
+                if os.path.isdir(capture_path) and os.path.exists(os.path.join(capture_path,"calibration.csv")):
                     f = extract.FeatureExtractor(os.path.join(capture_path,"calibration.csv"))
                     f.setStartPoint()
                     for timestamp,imbgr,imdepth in FakenectReader(capture_path):
                         f.addPoint(timestamp,imbgr,imdepth)
 
                     feature = f.getFeatures()
-                    if feature.size:
-                        dataset_X.append(np.nan_to_num(feature[:-5,:]))
+                    if feature.size and feature.shape[0] >= 15:
+                        dataset_X.append(np.nan_to_num(feature))
                         dataset_Y.append(label_index)
 
     return labels,dataset_X,dataset_Y
