@@ -42,36 +42,9 @@ if __name__ == "__main__":
                         
 
                         obs = np.nan_to_num(f.getFeatures())
-
-                        #To get rid of extra zeroes
-                        zero_indices = np.where(np.all(obs==0,1))[0]
-                        if len(zero_indices):
-                            cutoff = zero_indices[-1]
-                            if obs.shape[0] > cutoff+2:
-                                obs = obs[cutoff+1:,:]
-                            else:
-                                obs = np.array([])
-
- 
-                        if obs.shape[0] > 100:
-                            obs = obs[-100:,:]
-
-                        if obs.shape[0] >= 20:
-                            score = models.get_score(obs, rand_sign)
-                            threshold = models.get_threshold(obs)
-                            #print str(score) + "/" + str(threshold)
-                            if score > threshold:
-                                    detectedSign = 1
-                            else:
-                                for i in range(1,obs.shape[0]/10):
-                                    obs_short = obs[i*10:,:]
-                                    score = models.get_score(obs_short, rand_sign)
-                                    threshold = models.get_threshold(obs_short)
-                                    #print str(score) + "/" + str(threshold)
-                                    if score>threshold:
-                                        detectedSign = 1
-                                        break
-
+                        detected = models.detect(obs,rand_sign)
+                        if detected:
+                            detectedSign = 1
 
                     #print feedback                        
                     if detectedSign and detectedSign < 30:

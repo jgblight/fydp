@@ -171,11 +171,42 @@ class ContinuousSignModel:
         return prediction,score
 
     def get_score(self, obs, index):
-        score = self.models[index].score(obs)
-        return score
+        return self.models[index].score(obs)
 
     def get_threshold(self,obs):
         return self.threshold.score(obs)
+
+    def detect(self,obs,index=None):
+        cutoff = 0
+        zero_counter = 0
+        for i in range(obs.shape[0]):            
+            if np.all(obs[i,:]==0):
+                zero_counter += 1
+            else:
+                zero_counter = 0
+            if zero_counter > 10:
+                cutoff = i + 1
+
+        obs = obs[cutoff:,:]
+        print np.where(np.all(obs==0,1))
+
+        if obs.shape[0] > 100:
+            obs = obs[-100:,:]
+
+        if obs.shape[0] >= 20:
+            for i in range(0,obs.shape[0]/10):
+                obs_short = obs[i*10:,:]
+                if index is None:
+                    prediction,score = self.predict(obs)
+                else:
+                    score = self.get_score(obs, index)
+                    prediction = True
+                threshold = self.get_threshold(obs_short)
+                if score > threshold:
+                    return prediction
+            if index is None:
+                return None
+            return False
 
 def getDataset(training_folder):
     #need to set up some sort of cross-validation
