@@ -188,7 +188,6 @@ class ContinuousSignModel:
                 cutoff = i + 1
 
         obs = obs[cutoff:,:]
-        print np.where(np.all(obs==0,1))
 
         if obs.shape[0] > 100:
             obs = obs[-100:,:]
