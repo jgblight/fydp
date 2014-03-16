@@ -10,6 +10,20 @@ import time
 import calendar
 from HMM_learning import ContinuousSignModel
 
+def featureWindow(imbgr,f,v):
+    greenmoments,greenhull = f.getCentralMoments(imbgr,'right')
+    redmoments,redhull = f.getCentralMoments(imbgr,'left')
+
+    cv2.drawContours(imbgr,[greenhull],-1,(0,255,0),2)
+    cv2.drawContours(imbgr,[redhull],-1,(0,0,255),2)
+
+    if v.shape:
+        v = np.nan_to_num(v)
+        cv2.circle(imbgr,(int(v[14]),int(v[15])),3,(0,0,255),4)
+        cv2.circle(imbgr,(int(v[16]),int(v[17])),3,(0,255,0),4)
+
+    cv2.imshow("Features",imbgr)
+
 if __name__ == "__main__":
 
     cv2.namedWindow("Demo", cv2.WINDOW_NORMAL)
@@ -57,6 +71,7 @@ if __name__ == "__main__":
                 try:
                     
                     imbgr = np.array(fe.get_video())
+                    img = np.copy(imbgr)
 
                     if not detectedSign:
 
@@ -88,7 +103,8 @@ if __name__ == "__main__":
                         detectedSign += 1
 
 
-                   #cv2.imshow("Demo",imbgr)
+                    #cv2.imshow("Demo",imbgr)
+                    featureWindow(img,f,v)
 
                 except KeyboardInterrupt:
                     break
