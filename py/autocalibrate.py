@@ -104,6 +104,8 @@ def get_error(imbgr,low,high,ideal,blue=False):
         cnt = filt.getColourContours(imbgr)
         feature = blue_contours(cnt)
     else:
+        if len(filt.getColourContours(imbgr)) != 5:
+            return 20
         hull = filt.getColourHull(imbgr)
         if len(hull):
             m = cv2.moments(hull)
@@ -120,16 +122,18 @@ def get_start(c,low_key,high_key):
     high = np.zeros(3)
     for i in range(3):
         history = c[low_key][:,i]
-        low[i] = np.random.uniform(np.min(history),np.max(history))
+        #low[i] = np.random.uniform(np.min(history),np.max(history))
+        low[i] = np.random.normal(np.mean(history),np.std(history))
         history = c[high_key][:,i]
-        high[i] = np.random.uniform(np.max([np.min(history),low[i]]),np.max(history))
+        high[i] = np.random.normal(np.mean(history),np.std(history))
+        #high[i] = np.random.uniform(np.max([np.min(history),low[i]]),np.max(history))
     return low,high
 
-def optimize(imbgr,got,frame_count,low,high,c,low_key,high_key,threshold,blue=False):
+def optimize(imbgr,got,frame_count,low,high,ideal,c,low_key,high_key,threshold,blue=False):
     iterations = 10
     if not got:
         i = 0
-        error = get_error(imbgr,low,high,g_m,blue)
+        error = get_error(imbgr,low,high,ideal,blue)
         if frame_count == 0:
             restart = np.random.uniform()
             if restart*error > threshold*1.5:
@@ -139,12 +143,12 @@ def optimize(imbgr,got,frame_count,low,high,c,low_key,high_key,threshold,blue=Fa
                 d_low = np.random.choice([-1,0,1],3)*d
                 d_high = np.random.choice([-1,0,1],3)*d
 
-                new_error = get_error(imbgr,low+d_low,high,g_m,blue)
+                new_error = get_error(imbgr,low+d_low,high,ideal,blue)
                 if new_error < error:
                     error = new_error
                     low = low+d_low 
                     
-                new_error = get_error(imbgr,low,high+d_high,g_m,blue)
+                new_error = get_error(imbgr,low,high+d_high,ideal,blue)
                 if new_error < error:
                     error = new_error
                     high = high+d_high  
@@ -181,11 +185,11 @@ def autocalibrate(g_m,r_m,b_m,c):
             imbgr = np.array(fe.get_video())
 
             print "green"
-            got_green,gcount,glow,ghigh = optimize(imbgr,got_green,gcount,glow,ghigh,c,"glow","ghigh",0.04)
+            got_green,gcount,glow,ghigh = optimize(imbgr,got_green,gcount,glow,ghigh,g_m,c,"glow","ghigh",0.03)
             print "red"
-            got_red,rcount,rlow,rhigh = optimize(imbgr,got_red,rcount,rlow,rhigh,c,"rlow","rhigh",0.04)
+            got_red,rcount,rlow,rhigh = optimize(imbgr,got_red,rcount,rlow,rhigh,r_m,c,"rlow","rhigh",0.04)
             print "blue"
-            got_blue,bcount,blow,bhigh = optimize(imbgr,got_blue,bcount,blow,bhigh,c,"blow","bhigh",0.05)
+            got_blue,bcount,blow,bhigh = optimize(imbgr,got_blue,bcount,blow,bhigh,b_m,c,"blow","bhigh",0.05,blue=True)
             
             green = fe.colourFilter(glow,ghigh)   
             hull = green.getColourHull(imbgr)   
