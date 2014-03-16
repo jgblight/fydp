@@ -39,8 +39,8 @@ if __name__ == "__main__":
                 sign1 = 3
                 sign2 = 6
                 question = "Stay at your HOUSE or go to a MOVIE?"
-                sign1Location = os.path.join(folderpath, "husky.png")
-                sign2Location = os.path.join(folderpath, "chihuahua.png")
+                sign1Location = os.path.join(folderpath, "lonely.jpg")
+                sign2Location = os.path.join(folderpath, "popcorn.png")
                 showText1 = "Booooring"
                 showText2 = "Can I come?"
 
@@ -49,7 +49,7 @@ if __name__ == "__main__":
                 sign2 = 1
                 question = "Stuck on a desert island with your MOTHER or your CAT?"
                 sign1Location = os.path.join(folderpath, "husky.png")
-                sign2Location = os.path.join(folderpath, "chihuahua.png")             
+                sign2Location = os.path.join(folderpath, "grumpycat.jpg")             
                 showText1 = "Your MOTHER??"
                 showText2 = "Your CAT??"
 
