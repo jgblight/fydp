@@ -13,7 +13,8 @@ from HMM_learning import ContinuousSignModel
 if __name__ == "__main__":
 
     cv2.namedWindow("Demo", cv2.WINDOW_NORMAL)
-    cv2.resizeWindow("Demo", 1000, 900)   
+    cv2.resizeWindow("Demo", 1000, 900)
+    folderpath = os.path.dirname(__file__)  
     modelfile = open(sys.argv[2])
     models = pickle.load(modelfile)
     labels = models.labels
@@ -30,16 +31,16 @@ if __name__ == "__main__":
                 sign1 = 0
                 sign2 = 8
                 question = "A BIG pet dog or a SMALL one?"
-                sign1Location = "/home/sara/fydp/py/husky.png"
-                sign2Location = "/home/sara/fydp/py/chihuahua.png"
+                sign1Location = os.path.join(folderpath, "husky.png")
+                sign2Location = os.path.join(folderpath, "chihuahua.png")
                 showText1 = "A BIG dog!"
                 showText2 = "A SMALL dog!"
             elif i == 1:
                 sign1 = 3
                 sign2 = 6
                 question = "Stay at your HOUSE or go to a MOVIE?"
-                sign1Location = "/home/sara/fydp/py/husky.png"
-                sign2Location = "/home/sara/fydp/py/chihuahua.png"
+                sign1Location = os.path.join(folderpath, "husky.png")
+                sign2Location = os.path.join(folderpath, "chihuahua.png")
                 showText1 = "Booooring"
                 showText2 = "Can I come?"
 
@@ -47,8 +48,8 @@ if __name__ == "__main__":
                 sign1 = 5
                 sign2 = 1
                 question = "Stuck on a desert island with your MOTHER or your CAT?"
-                sign1Location = "/home/sara/fydp/py/husky.png"
-                sign2Location = "/home/sara/fydp/py/chihuahua.png"                
+                sign1Location = os.path.join(folderpath, "husky.png")
+                sign2Location = os.path.join(folderpath, "chihuahua.png")             
                 showText1 = "Your MOTHER??"
                 showText2 = "Your CAT??"
 
