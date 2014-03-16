@@ -81,14 +81,16 @@ class colourFilter:
         return imfilter
 
     def blobSmoothing(self,immask):
-        imfilter = cv2.medianBlur(immask,7)
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(5,5))
+
+        imfilter = cv2.dilate(immask,kernel)
+        imfilter = cv2.erode(imfilter,kernel)
+
+        imfilter = cv2.medianBlur(imfilter,7)
         imfilter = cv2.medianBlur(imfilter,5)
         imfilter = cv2.medianBlur(imfilter,3)
 
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(5,5))
 
-        imfilter = cv2.dilate(imfilter,kernel)
-        imfilter = cv2.erode(imfilter,kernel)
         return imfilter
 
     @memoize

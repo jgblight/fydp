@@ -130,7 +130,7 @@ def get_start(c,low_key,high_key):
     return low,high
 
 def optimize(imbgr,got,frame_count,low,high,ideal,c,low_key,high_key,threshold,blue=False):
-    iterations = 10
+    iterations = 5
     if not got:
         i = 0
         error = get_error(imbgr,low,high,ideal,blue)
@@ -165,7 +165,8 @@ def optimize(imbgr,got,frame_count,low,high,ideal,c,low_key,high_key,threshold,b
             got = True
     return got,frame_count,low,high
 
-def autocalibrate(g_m,r_m,b_m,c):
+def autocalibrate(calibration_file):
+    g_m,r_m,b_m,c = get_features()
 
     got_green = False
     got_blue = False
@@ -220,7 +221,7 @@ def autocalibrate(g_m,r_m,b_m,c):
         if frame_count >= 30:
             break
 
-    with open(sys.argv[1],'w') as csvfile:
+    with open(calibration_file,'w') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(glow)
         writer.writerow(ghigh)
@@ -229,23 +230,8 @@ def autocalibrate(g_m,r_m,b_m,c):
         writer.writerow(rlow)
         writer.writerow(rhigh)
 
+    return glow,ghigh,blow,bhigh,rlow,rhigh
 
-
-if __name__ == '__main__':
-    if len(sys.argv) > 2:
-        g_m,r_m,b_m,c = get_features()
-        pickler = open("calibration_features.pkl","wb")
-        pickle.dump(g_m,pickler)
-        pickle.dump(r_m,pickler)
-        pickle.dump(b_m,pickler)
-        pickle.dump(c,pickler)
-    else:
-        modelfile = open("calibration_features.pkl")
-        g_m = pickle.load(modelfile)
-        r_m = pickle.load(modelfile)
-        b_m = pickle.load(modelfile)
-        c = pickle.load(modelfile)
-    autocalibrate(g_m,r_m,b_m,c)
 
 
     
