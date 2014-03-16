@@ -162,10 +162,13 @@ class ContinuousSignModel:
             self.models.append(model)
         self.create_threshold_model()
 
-    def predict(self,obs):
+    def predict(self,obs,indices=[]):
         likelihoods = []
-        for model in self.models:
-            likelihoods.append(model.score(obs))
+        for i,model in enumerate(self.models):
+            if i in indices or len(indices) == 0:
+                likelihoods.append(model.score(obs))
+            else:
+                likelihoods.append(np.nan)
         score = np.nanmax(likelihoods)
         prediction =  np.nanargmax(likelihoods)
         return prediction,score
@@ -176,7 +179,7 @@ class ContinuousSignModel:
     def get_threshold(self,obs):
         return self.threshold.score(obs)
 
-    def detect(self,obs,index=None):
+    def detect(self,obs,index=[]):
         cutoff = 0
         zero_counter = 0
         for i in range(obs.shape[0]):            
@@ -195,7 +198,7 @@ class ContinuousSignModel:
         if obs.shape[0] >= 20:
             for i in range(0,obs.shape[0]/10):
                 obs_short = obs[i*10:,:]
-                if index is None:
+                if type(index) is list:
                     prediction,score = self.predict(obs)
                 else:
                     score = self.get_score(obs, index)
@@ -203,7 +206,7 @@ class ContinuousSignModel:
                 threshold = self.get_threshold(obs_short)
                 if score > threshold:
                     return prediction
-            if index is None:
+            if type(index) is list:
                 return None
             return False
 

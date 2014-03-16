@@ -65,17 +65,18 @@ if __name__ == "__main__":
                       
                         obs = np.nan_to_num(f.getFeatures())
 
-                        sign1Detected = models.detect(obs, sign1)
-                        sign2Detected = models.detect(obs, sign2)
+                        #sign1Detected = models.detect(obs, sign1)
+                        #sign2Detected = models.detect(obs, sign2)
+                        sign = models.detect(obs,[sign1,sign2])
 
                         cv2.imshow("Demo",imbgr)
  
-                        if sign1Detected:
+                        if sign == sign1:
                             showimage = cv2.imread(sign1Location,0)
                             showtext = showText1
                             detectedSign = 1
 
-                        if sign2Detected:
+                        if sign == sign2:
                             showimage = cv2.imread(sign2Location,0)
                             showtext = showText2
                             detectedSign = 1
