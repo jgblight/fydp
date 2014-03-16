@@ -161,7 +161,7 @@ def optimize(imbgr,got,frame_count,low,high,ideal,c,low_key,high_key,threshold,b
         elif frame_count > 0:
             frame_count = 0
 
-        if frame_count > 10:
+        if frame_count > 5:
             got = True
     return got,frame_count,low,high
 
@@ -185,9 +185,9 @@ def autocalibrate(g_m,r_m,b_m,c):
             imbgr = np.array(fe.get_video())
 
             print "green"
-            got_green,gcount,glow,ghigh = optimize(imbgr,got_green,gcount,glow,ghigh,g_m,c,"glow","ghigh",0.03)
+            got_green,gcount,glow,ghigh = optimize(imbgr,got_green,gcount,glow,ghigh,g_m,c,"glow","ghigh",0.05)
             print "red"
-            got_red,rcount,rlow,rhigh = optimize(imbgr,got_red,rcount,rlow,rhigh,r_m,c,"rlow","rhigh",0.04)
+            got_red,rcount,rlow,rhigh = optimize(imbgr,got_red,rcount,rlow,rhigh,r_m,c,"rlow","rhigh",0.05)
             print "blue"
             got_blue,bcount,blow,bhigh = optimize(imbgr,got_blue,bcount,blow,bhigh,b_m,c,"blow","bhigh",0.05,blue=True)
             
