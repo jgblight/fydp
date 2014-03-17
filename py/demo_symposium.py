@@ -4,6 +4,7 @@ import cv2
 import os
 import sys
 import featureExtraction as fe
+import autocalibrate as auto
 import csv
 import pickle
 import time
@@ -33,7 +34,12 @@ if __name__ == "__main__":
     models = pickle.load(modelfile)
     labels = models.labels
 
-    f = fe.FeatureExtractor(sys.argv[1])
+    if sys.argv[1] == "auto":
+        auto.AutoCalibrate("calibration.csv","/home/sara/Dropbox/fakenect-storage/calibration")
+        f = fe.FeatureExtractor("calibration.csv")
+    else:
+        f = fe.FeatureExtractor(sys.argv[1])
+
     for i in range(10):
         try:
             rand_sign = np.random.randint(0,len(labels))
