@@ -232,6 +232,9 @@ def autocalibrate(calibration_file):
 
     return glow,ghigh,blow,bhigh,rlow,rhigh
 
+if __name__ == '__main__':
+    autocalibrate(sys.argv[1])
+
 
 
     
