@@ -38,7 +38,7 @@ if __name__ == "__main__":
     cv2.resizeWindow("Demo", 950, 900)
 
     if sys.argv[1] == "auto":
-        auto.AutoCalibrate("calibration.csv","/home/sara/Dropbox/fakenect-storage/calibration")
+        auto.AutoCalibrate("calibration.csv","/Users/jgblight/Dropbox/fakenect-storage/calibration")
         f = fe.FeatureExtractor("calibration.csv")
     else:
         f = fe.FeatureExtractor(sys.argv[1])
@@ -66,7 +66,7 @@ if __name__ == "__main__":
                 question = "Stay at your HOUSE or go to a MOVIE?"
                 question_l2 = ""
                 sign1Location = os.path.join(folderpath, "lonely.jpg")
-                sign2Location = os.path.join(folderpath, "popcorn.png")
+                sign2Location = os.path.join(folderpath, "popcorn.jpg")
                 showText1 = "Booooring"
                 showText2 = "Can I come?"
 

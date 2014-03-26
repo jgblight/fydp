@@ -89,6 +89,7 @@ class colourFilter:
         imfilter = cv2.medianBlur(imfilter,7)
         imfilter = cv2.medianBlur(imfilter,5)
         imfilter = cv2.medianBlur(imfilter,3)
+        imfilter = cv2.medianBlur(imfilter,3)
 
 
         return imfilter
@@ -172,8 +173,8 @@ class FeatureExtractor:
         self.timeline = np.array([])
 
     def getHandPosition(self,imbgr,imdepth,hand):
-        #centroid = self.markers[hand].getCombinedCentroid(imbgr, self.markers['glove'])
-        centroid = self.markers[hand].getCentroid(imbgr)
+        centroid = self.markers[hand].getCombinedCentroid(imbgr, self.markers['glove'])
+        #centroid = self.markers[hand].getCentroid(imbgr)
         if centroid.size:
             return centroid
         return np.array([np.nan,np.nan])

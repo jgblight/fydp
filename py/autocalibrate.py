@@ -66,7 +66,6 @@ class AutoCalibrate:
 
                 blue_moments += blue_m
 
-                print f.markers['right'].low
                 if calibration.has_key('glow'):
                     calibration['glow'] = np.vstack((calibration['glow'],f.markers['right'].low))
                 else:
@@ -160,7 +159,7 @@ class AutoCalibrate:
 
                     i += 1  
 
-            print error
+            #print error
             if error < threshold:
                 frame_count += 1
             elif frame_count > 0:
@@ -190,11 +189,11 @@ class AutoCalibrate:
             try:
                 imbgr = np.array(fe.get_video())
 
-                print "green"
+                #print "green"
                 got_green,gcount,glow,ghigh = self.optimize(imbgr,got_green,gcount,glow,ghigh,g_m,c,"glow","ghigh",0.05)
-                print "red"
+                #print "red"
                 got_red,rcount,rlow,rhigh = self.optimize(imbgr,got_red,rcount,rlow,rhigh,r_m,c,"rlow","rhigh",0.05)
-                print "blue"
+                #print "blue"
                 got_blue,bcount,blow,bhigh = self.optimize(imbgr,got_blue,bcount,blow,bhigh,b_m,c,"blow","bhigh",0.05,blue=True)
                 
                 green = fe.colourFilter(glow,ghigh)   
@@ -238,7 +237,7 @@ class AutoCalibrate:
         return glow,ghigh,blow,bhigh,rlow,rhigh
 
 if __name__ == '__main__':
-    autocalibrate(sys.argv[1])
+    AutoCalibrate(sys.argv[1],sys.argv[2])
 
 
 

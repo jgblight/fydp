@@ -193,16 +193,20 @@ class ContinuousSignModel:
 
         obs = obs[cutoff:,:]
 
-        if obs.shape[0] > 100:
+        if obs.shape[0] > 50:
             obs = obs[-100:,:]
 
         if obs.shape[0] >= 20:
             for i in range(0,obs.shape[0]/10):
                 obs_short = obs[i*10:,:]
+                #indices = [14,15,16,17]
+                #nanmin = np.nanmin(obs_short[:,indices],0)
+                #nanmax = np.nanmax(obs_short[:,indices],0)
+                #obs_short[:,indices] = (obs_short[:,indices] - nanmin)/(nanmax-nanmin)
                 if type(index) is list:
-                    prediction,score = self.predict(obs)
+                    prediction,score = self.predict(obs_short)
                 else:
-                    score = self.get_score(obs, index)
+                    score = self.get_score(obs_short, index)
                     prediction = True
                 threshold = self.get_threshold(obs_short)
                 if score > threshold:
