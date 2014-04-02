@@ -8,6 +8,7 @@ import time
 import pickle
 import csv
 import random
+import copy
 from multiprocessing import Process,Pipe
 from itertools import izip
 
@@ -99,13 +100,13 @@ class DiscreteSignModel:
 
     def train(self,train_X,train_Y,N):
         self.models = []
-        self.clusters = Clusters(30)
+        self.clusters = Clusters(N[-1])
         self.clusters.train(train_X)
 
         for i,label in enumerate(labels):
             training_set = [x for x,y in zip(train_X,train_Y) if (y==i)]
 
-            model = hmmpy.HMM(N,V=range(30))
+            model = hmmpy.HMM(N[i],V=range(N[-1]))
             discrete_obs = self.clusters.classify_set(training_set)
             model = hmmpy.baum_welch(model,discrete_obs)
 
@@ -118,8 +119,8 @@ class DiscreteSignModel:
             if model:
                 likelihoods.append(hmmpy.forward(model,self.clusters.classify(obs))[0])
             else:
-                likelihoods.append(0)
-        return np.nanargmax(likelihoods)
+                likelihoods.append(np.nan)
+        return np.nanargmax(likelihoods),np.nanmax(likelihoods)
 
 class ContinuousSignModel:
     def __init__(self,labels):
@@ -192,16 +193,20 @@ class ContinuousSignModel:
 
         obs = obs[cutoff:,:]
 
-        if obs.shape[0] > 100:
+        if obs.shape[0] > 50:
             obs = obs[-100:,:]
 
         if obs.shape[0] >= 20:
             for i in range(0,obs.shape[0]/10):
                 obs_short = obs[i*10:,:]
+                #indices = [14,15,16,17]
+                #nanmin = np.nanmin(obs_short[:,indices],0)
+                #nanmax = np.nanmax(obs_short[:,indices],0)
+                #obs_short[:,indices] = (obs_short[:,indices] - nanmin)/(nanmax-nanmin)
                 if type(index) is list:
-                    prediction,score = self.predict(obs)
+                    prediction,score = self.predict(obs_short)
                 else:
-                    score = self.get_score(obs, index)
+                    score = self.get_score(obs_short, index)
                     prediction = True
                 threshold = self.get_threshold(obs_short)
                 if score > threshold:
@@ -215,10 +220,11 @@ def getDataset(training_folder):
     labels = []
     dataset_X = []
     dataset_Y = []
+    capture_labels = []
 
     for label in os.listdir(training_folder):
         label_path = os.path.join(training_folder,label)
-        if os.path.isdir(label_path):
+        if os.path.isdir(label_path) and not label == "GARBAGE":
             labels.append(label)
             label_index = len(labels) - 1
             print label
@@ -231,11 +237,12 @@ def getDataset(training_folder):
                         f.addPoint(timestamp,imbgr,imdepth)
 
                     feature = f.getFeatures()
-                    if feature.size and feature.shape[0] >= 15:
+                    if feature.size and feature.shape[0] >= 5:
                         dataset_X.append(np.nan_to_num(feature))
                         dataset_Y.append(label_index)
+                        capture_labels.append(capture)
 
-    return labels,dataset_X,dataset_Y
+    return labels,dataset_X,dataset_Y,capture_labels
 
 def fragment_sample(obs):
     frames = obs.shape[0]
@@ -330,6 +337,7 @@ def randomrandomSearch(labels,dataset_X,dataset_Y):
         print "start"
         np.random.seed(seed)
         N = np.random.randint(3,10,len(labels)+1)
+        N[-1] = np.random.uniform(10,30)
         accuracy,_ = evaluateModel(labels,dataset_X,dataset_Y,N)
         print "finish"
         return (N,accuracy)
@@ -345,6 +353,25 @@ def randomrandomSearch(labels,dataset_X,dataset_Y):
             accuracy = [1]
     return N
 
+def selective_delete(labels,dataset_X,dataset_Y,c):
+    cset = set(c)
+    N = np.ones(len(labels)+1)*6
+    for remove_label in cset:
+        remove = []
+        for i,c_label in enumerate(c):
+            if c_label == remove_label:
+                remove.append(i)
+        print remove_label
+        remove.reverse()
+        print remove
+        subset_X = copy.deepcopy(dataset_X)
+        subset_Y = copy.deepcopy(dataset_Y)
+        for i in remove:
+            del subset_X[i]
+            del subset_Y[i]
+        accuracy,confusion = evaluateModel(labels,subset_X,subset_Y,N.astype('int'))
+        print accuracy
+
 
 def createModel(labels,dataset_X,dataset_Y,modelname,N):
     model = ContinuousSignModel(labels)
@@ -355,20 +382,24 @@ def createModel(labels,dataset_X,dataset_Y,modelname,N):
 
 if __name__ == "__main__":
     if len(sys.argv) > 2:
-        labels,dataset_X,dataset_Y = getDataset(sys.argv[2])
+        labels,dataset_X,dataset_Y,c = getDataset(sys.argv[2])
 
         # persist dataset
         pickler = open("dataset.pkl","wb")
         pickle.dump(labels,pickler)
         pickle.dump(dataset_X,pickler)
         pickle.dump(dataset_Y,pickler)
+        pickle.dump(c,pickler)
     else:
         #retrieve dataset
         modelfile = open("dataset.pkl")
         labels = pickle.load(modelfile)
         dataset_X = pickle.load(modelfile)
         dataset_Y = pickle.load(modelfile)
+        c = pickle.load(modelfile)
 
+
+    #selective_delete(labels,dataset_X,dataset_Y,c)
 
     best_N = randomrandomSearch(labels,dataset_X,dataset_Y)
     accuracy,confusion = evaluateModel(labels,dataset_X,dataset_Y,best_N)

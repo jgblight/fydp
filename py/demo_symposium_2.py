@@ -38,7 +38,7 @@ if __name__ == "__main__":
     cv2.resizeWindow("Demo", 950, 900)
 
     if sys.argv[1] == "auto":
-        auto.AutoCalibrate("calibration.csv","/home/sara/Dropbox/fakenect-storage/calibration")
+        auto.AutoCalibrate("calibration.csv","/Users/jgblight/Dropbox/fakenect-storage/calibration")
         f = fe.FeatureExtractor("calibration.csv")
     else:
         f = fe.FeatureExtractor(sys.argv[1])

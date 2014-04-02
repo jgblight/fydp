@@ -35,16 +35,16 @@ if __name__ == "__main__":
     labels = models.labels
 
     if sys.argv[1] == "auto":
-        auto.AutoCalibrate("calibration.csv","/home/sara/Dropbox/fakenect-storage/calibration")
+        auto.AutoCalibrate("calibration.csv","/Users/jgblight/Dropbox/fakenect-storage/calibration")
         f = fe.FeatureExtractor("calibration.csv")
     else:
         f = fe.FeatureExtractor(sys.argv[1])
 
    
-
-    for i in range(10):
+    #for i in range(10):
+    for i,rand_sign in enumerate([1,5,8,7,9,0,2,6]):
         try:
-            rand_sign = np.random.randint(0,len(labels))
+            #rand_sign = np.random.randint(0,len(labels))
             f.setStartPoint()
             detectedSign = 0
             countDown = 0
