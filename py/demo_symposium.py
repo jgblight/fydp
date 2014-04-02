@@ -71,7 +71,7 @@ if __name__ == "__main__":
                             imdepth = np.array(fe.get_depth())
 
                             if not detectedSign:
-                                  cv2.putText(imbgr,labels[rand_sign],(5,50),cv2.FONT_HERSHEY_COMPLEX,2,(0,0,0),5)
+                                  cv2.putText(imbgr,labels[rand_sign],(5,50),cv2.FONT_HERSHEY_COMPLEX,2,(255,255,255),5)
 
                             v = f.addPoint(time.time(),imbgr,imdepth)
                             

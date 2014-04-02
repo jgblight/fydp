@@ -66,7 +66,7 @@ if __name__ == "__main__":
                 question = "Stay at your HOUSE or go to a MOVIE?"
                 question_l2 = ""
                 sign1Location = os.path.join(folderpath, "lonely.jpg")
-                sign2Location = os.path.join(folderpath, "popcorn.png")
+                sign2Location = os.path.join(folderpath, "popcorn.jpg")
                 showText1 = "Booooring"
                 showText2 = "Can I come?"
 
