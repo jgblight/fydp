@@ -89,6 +89,7 @@ class colourFilter:
         imfilter = cv2.medianBlur(imfilter,7)
         imfilter = cv2.medianBlur(imfilter,5)
         imfilter = cv2.medianBlur(imfilter,3)
+        imfilter = cv2.medianBlur(imfilter,3)
 
 
         return imfilter
