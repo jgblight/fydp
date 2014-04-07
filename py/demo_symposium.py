@@ -4,6 +4,7 @@ import cv2
 import os
 import sys
 import featureExtraction as fe
+import autocalibrate as auto
 import csv
 import pickle
 import time
@@ -28,17 +29,25 @@ def featureWindow(imbgr,f,v):
 if __name__ == "__main__":
 
     cv2.namedWindow("Demo", cv2.WINDOW_NORMAL)
-    cv2.resizeWindow("Demo", 1000, 900)   
+    cv2.resizeWindow("Demo", 950, 900)   
     modelfile = open(sys.argv[2])
     models = pickle.load(modelfile)
     labels = models.labels
 
-    f = fe.FeatureExtractor(sys.argv[1])
-    for i in range(10):
+    if sys.argv[1] == "auto":
+        auto.AutoCalibrate("calibration.csv","/Users/jgblight/Dropbox/fakenect-storage/calibration")
+        f = fe.FeatureExtractor("calibration.csv")
+    else:
+        f = fe.FeatureExtractor(sys.argv[1])
+
+   
+    #for i in range(10):
+    for i,rand_sign in enumerate([1,5,8,7,9,0,2,6]):
         try:
-            rand_sign = np.random.randint(0,len(labels))
+            #rand_sign = np.random.randint(0,len(labels))
             f.setStartPoint()
             detectedSign = 0
+            countDown = 0
 
             while detectedSign < 30:
                 try:
@@ -46,30 +55,42 @@ if __name__ == "__main__":
                     imbgr = np.array(fe.get_video())
                     img = np.copy(imbgr)
 
-                    if not detectedSign:
-                        imdepth = np.array(fe.get_depth())
+                    if i == 0 and countDown < 90:
+                        imbgr = np.zeros((480,640,3))
+                        if countDown < 30:
+                            cv2.putText(imbgr, "3" ,(250,250),cv2.FONT_HERSHEY_COMPLEX,5,(255,255,255),5)
+                        elif countDown < 60:
+                            cv2.putText(imbgr, "2" ,(250,250),cv2.FONT_HERSHEY_COMPLEX,5,(255,255,255),5)
+                        elif countDown < 90:
+                            cv2.putText(imbgr, "1" ,(250,250),cv2.FONT_HERSHEY_COMPLEX,5,(255,255,255),5)
+                        cv2.imshow("Demo",imbgr)
+                        countDown += 1
 
+                    else:
                         if not detectedSign:
-                              cv2.putText(imbgr,labels[rand_sign],(5,50),cv2.FONT_HERSHEY_COMPLEX,2,(0,0,0),5)
+                            imdepth = np.array(fe.get_depth())
 
-                        v = f.addPoint(time.time(),imbgr,imdepth)
-                        
+                            if not detectedSign:
+                                  cv2.putText(imbgr,labels[rand_sign],(5,50),cv2.FONT_HERSHEY_COMPLEX,2,(255,255,255),5)
 
-                        obs = np.nan_to_num(f.getFeatures())
-                        detected = models.detect(obs,rand_sign)
-                        if detected:
-                            detectedSign = 1
+                            v = f.addPoint(time.time(),imbgr,imdepth)
+                            
 
-                    #print feedback                        
-                    if detectedSign and detectedSign < 30:
-                            imbgr = np.zeros((480,640,3))
-                            cv2.putText(imbgr, "Excellent!" ,(5,50),cv2.FONT_HERSHEY_COMPLEX,2,(255,255,255),5)
-                            cv2.imshow("Demo",imbgr)
-                            detectedSign += 1
+                            obs = np.nan_to_num(f.getFeatures())
+                            detected = models.detect(obs,rand_sign)
+                            if detected:
+                                detectedSign = 1
+
+                        #print feedback                        
+                        if detectedSign and detectedSign < 30:
+                                imbgr = np.zeros((480,640,3))
+                                cv2.putText(imbgr, "Excellent!" ,(5,50),cv2.FONT_HERSHEY_COMPLEX,2,(255,255,255),5)
+                                cv2.imshow("Demo",imbgr)
+                                detectedSign += 1
 
 
-                    cv2.imshow("Demo",imbgr)
-                    featureWindow(img,f,v)
+                        cv2.imshow("Demo",imbgr)
+                        featureWindow(img,f,v)
 
                 except KeyboardInterrupt:
                     break
